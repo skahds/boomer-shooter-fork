@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/xswan/doomengine/c/bin/cmake_install.cmake",
+		"/home/xswan/doomengine/c/bin/lib/glad/cmake_install.cmake",
+		"/home/xswan/doomengine/c/bin/lib/glfw/cmake_install.cmake",
+		"/home/xswan/doomengine/c/bin/lib/glfw/src/cmake_install.cmake",
+		"/home/xswan/doomengine/c/bin/lib/glfw/docs/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

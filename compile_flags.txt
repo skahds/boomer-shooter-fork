@@ -1,0 +1,10 @@
+-Wall
+-Wextra
+-Wno-unused-parameter
+-Iengine
+-Ilib/luajit/src
+-Ilib/glad/include
+-Dbse_linux
+-Dbse_windows
+-Dbse_release
+-Dbse_debug
