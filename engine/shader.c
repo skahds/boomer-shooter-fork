@@ -1,321 +1,334 @@
 #include "shader.h"
 
-#include <string.h>
-
 #include <glad/glad.h>
 
-#define uniform_set_max_load 0.75
+#include "mem.h"
 
-static Uniform* findUniform(
-  Uniform* uniforms,
-  int capacity,
+#define UNIFORM_NAME_MAX 512
+
+struct ShaderVar
+{
+  char* name;
+  uint16_t len;
+  uint32_t hash;
+
+  int loc;
+  int count;
+  uint32_t type;
+};
+
+static char* ReadFile(const char* path)
+{
+  FILE* file = fopen(path, "rb");
+  if (file == NULL) {
+    LogError("could not open file '%s'", path);
+    return NULL;
+  }
+
+  fseek(file, 0L, SEEK_END);
+  size_t file_size = ftell(file);
+  rewind(file);
+
+  char* buf = CreateArray(char, file_size + 1);
+  if (buf == NULL) {
+    LogError("error: file '%s' too large to read", path);
+    return NULL;
+  }
+
+  size_t bytes_read = fread(buf, sizeof(char), file_size, file);
+  if (bytes_read < file_size) {
+    Destroy(buf);
+    LogError("error: could not read file '%s'", path);
+    return NULL;
+  }
+
+  buf[bytes_read] = '\0';
+
+  fclose(file);
+
+  LogDebug("loaded file '%s'", path);
+  return buf;
+}
+
+static struct ShaderVar* FindShaderVar(
+  struct ShaderVar* vars, 
+  uint16_t capacity,
   const char* name,
-  int name_len,
+  uint16_t name_len,
   uint32_t name_hash)
 {
   if (capacity == 0) return NULL;
+
   uint32_t index = name_hash & (capacity - 1);
 
   while (true) {
-    Uniform* uniform = &uniforms[index];
-    if (uniform->name.chars == NULL) {
-      return uniform;
+    struct ShaderVar* var = &vars[index];
+    if (var->name == NULL) {
+      return var;
     } else if (
-      name_hash == uniform->name.hash &&
-      name_len == uniform->name.len &&
-      memcmp(name, uniform->name.chars, name_len) == 0
+      name_hash == var->hash &&
+      name_len == var->len &&
+      memcmp(name, var->name, name_len) == 0
     ) {
-      return uniform;
+      return var;
     }
 
     index = (index + 1) & (capacity - 1);
   }
 }
 
-static void growUniformTable(UniformTable* uniform_table)
+static void GrowShaderTable(struct ShaderTable* t)
 {
-  int new_capacity = uniform_table->capacity == 0 
-    ? 8
-    : uniform_table->capacity * 2;
-  Uniform* new_uniforms = createArr(Uniform, new_capacity);
-  for (int i = 0; i < new_capacity; i++) {
-    new_uniforms[i].name.chars = NULL; // mark as empty
+  uint16_t capacity = GrowCapacity(t->capacity);
+
+  struct ShaderVar* vars = CreateArray(struct ShaderVar, capacity);
+  for (int i = 0; i < capacity; i++) {
+    vars[i].name = NULL;
   }
 
-  for (int i = 0; i < uniform_table->capacity; i++) {
-    Uniform* uniform = &uniform_table->uniforms[i];
-    if (uniform->name.chars == NULL) {
-      continue; // skip empty
-    }
-
-    Uniform* new_position = findUniform(
-      new_uniforms,
-      new_capacity,
-      uniform->name.chars,
-      uniform->name.len,
-      uniform->name.hash
-    );
-    *new_position = *uniform;
+  for (int i = 0; i < t->capacity; i++) {
+    struct ShaderVar* var = &t->vars[i];
+    if (var->name == NULL) continue; // empty
+    
+    struct ShaderVar* new_position = FindShaderVar(
+      vars, capacity, var->name, var->len, var->hash);
+    *new_position = *var;
   }
 
-  if (uniform_table != NULL) destroy(uniform_table->uniforms);
-  uniform_table->uniforms = new_uniforms;
-  uniform_table->capacity = new_capacity;
+  Destroy(t->vars);
+  t->vars = vars;
+  t->capacity = capacity;
 }
 
-static void addUniform(UniformTable* uniform_table, Uniform uniform)
+static void AddShaderVar(struct ShaderTable* t, struct ShaderVar var)
 {
-  if (
-    uniform_table->count + 1 > uniform_table->capacity * uniform_set_max_load
-  ) {
-    growUniformTable(uniform_table);
+  if (t->count + 1 > t->capacity * 0.75) {
+    GrowShaderTable(t);
   }
 
-  Uniform* ptr = findUniform(
-    uniform_table->uniforms,
-    uniform_table->capacity,
-    uniform.name.chars,
-    uniform.name.len,
-    uniform.name.hash
-  );
-  *ptr = uniform;
-  uniform_table->count++;
+  struct ShaderVar* ptr = FindShaderVar(
+    t->vars, t->capacity, var.name, var.len, var.hash);
+  *ptr = var;
+  t->count++;
 }
 
-static uint32_t hashString(const char* str, int len)
+static void DestroyShaderTable(struct ShaderTable* t)
+{
+  for (int i = 0; i < t->capacity; i++) {
+    struct ShaderVar* var = &t->vars[i];
+    if (var->name == NULL) continue;
+    Destroy(var->name);
+  }
+  Destroy(t->vars);
+
+  t->vars = NULL;
+  t->count = 0;
+}
+
+static uint32_t HashString(const char* str, uint16_t len)
 {
   uint32_t hash = 2166136261u;
-  for (int i = 0; i < len; i++) {
+  for (uint16_t i = 0; i < len; i++) {
     hash ^= (uint8_t)str[i];
     hash *= 16777619;
   }
   return hash;
 }
 
-static void initShaderUniforms(Shader* s) 
+static void FindShaderUniforms(struct Shader* s)
 {
-  s->uniform_table = create(UniformTable);
-  s->uniform_table->uniforms = NULL;
-  s->uniform_table->count = 0;
-  s->uniform_table->capacity = 0;
+  s->uniforms.vars = NULL;
+  s->uniforms.count = 0;
+  s->uniforms.capacity = 0;
 
   int uniform_count;
   glGetProgramiv(s->handle, GL_ACTIVE_UNIFORMS, &uniform_count);
 
   for (int i = 0; i < uniform_count; i++) {
-    const int name_max = 32;
-    int name_length;
-    char name[name_max];
-    Uniform uniform;
-    uniform.location = i;
-
+    int name_len;
+    char name[UNIFORM_NAME_MAX];
+    struct ShaderVar var;
+    var.loc = i;
     glGetActiveUniform(
-      s->handle,
-      i,
-      name_max,
-      &name_length,
-      &uniform.count,
-      &uniform.type,
-      name
-    );
+       s->handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
 
-    uniform.name.len = name_length;
-    uniform.name.chars = createArr(char, name_length + 1);
-    memcpy(uniform.name.chars, name, name_length);
-    uniform.name.chars[name_length] = '\0';
-    uniform.name.hash = hashString(uniform.name.chars, name_length);
+    var.name = CreateArray(char, name_len + 1);
+    memcpy(var.name, name, name_len);
+    var.name[name_len] = '\0';
+    var.len = name_len;
+    var.hash = HashString(name, name_len);
 
-    addUniform(s->uniform_table, uniform);
+    AddShaderVar(&s->uniforms, var);
   }
 }
 
-
-static uint32_t createShader(const char* src, int type)
+static void FindShaderAttribs(struct Shader* s)
 {
-  uint32_t handle = glCreateShader(type);
-  glShaderSource(handle, 1, &src, NULL);
-  glCompileShader(handle);
+  s->attrs.vars = NULL;
+  s->attrs.count = 0;
+  s->attrs.capacity = 0;
 
-  int success;
-  glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    char info_log[512];
-    glGetShaderInfoLog(handle, 512, NULL, info_log);
-    logError("failed to compile shader: %s", info_log);
+  int attr_count;
+  glGetProgramiv(s->handle, GL_ACTIVE_ATTRIBUTES, &attr_count);
+
+  for (int i = 0; i < attr_count; i++) {
+    int name_len;
+    char name[UNIFORM_NAME_MAX];
+    struct ShaderVar var;
+    var.loc = i;
+    glGetActiveAttrib(
+       s->handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
+
+    var.name = CreateArray(char, name_len + 1);
+    memcpy(var.name, name, name_len);
+    var.name[name_len] = '\0';
+    var.len = name_len;
+    var.hash = HashString(name, name_len);
+
+    AddShaderVar(&s->attrs, var);
   }
-  return handle;
 }
 
-Shader shaderLoadFromFiles(const char* vert_path, const char* frag_path)
+static struct Shader ShaderCreate(uint32_t vert, uint32_t frag)
 {
-  char* vert_src = readFile(vert_path);
-  char* frag_src = readFile(frag_path);
+  struct Shader s;
 
-  Shader shader = shaderLoadFromSrc(vert_src, frag_src);
+  s.handle = glCreateProgram();
 
-  destroy(vert_src);
-  destroy(frag_src);
-
-  return shader;
-}
-
-Shader shaderLoadFromSrc(const char* vert_src, const char* frag_src)
-{
-  uint32_t vert = createShader(vert_src, GL_VERTEX_SHADER);
-  uint32_t frag = createShader(frag_src, GL_FRAGMENT_SHADER);
-
-  uint32_t prog = glCreateProgram();
-  logDebugInfo("create shader program %d", prog);
-
-  glAttachShader(prog, vert);
-  glAttachShader(prog, frag);
-  glLinkProgram(prog);
-
-  int success;
-  glGetProgramiv(prog, GL_LINK_STATUS, &success);
-  if (!success) {
-    char info_log[512];
-    glGetProgramInfoLog(prog, 512, NULL, info_log);
-    logError("failed to link shader: %s", info_log);
-  }
+  glAttachShader(s.handle, vert);
+  glAttachShader(s.handle, frag);
+  glLinkProgram(s.handle);
 
   glDeleteShader(vert);
   glDeleteShader(frag);
 
-  Shader shader;
-  shader.handle = prog;
-  initShaderUniforms(&shader);
-
-  return shader;
-}
-
-void shaderDestroy(Shader* s)
-{
-  logDebugInfo("destroy shader program %d", s->handle);
-
-  glDeleteProgram(s->handle);
-  
-  for (int i = 0; i < s->uniform_table->capacity; i++) {
-    Uniform* uniform = &s->uniform_table->uniforms[i];
-    if (uniform->name.chars == NULL) {
-      continue;
-    }
-    destroy(uniform->name.chars);
+  int status;
+  glGetProgramiv(s.handle, GL_LINK_STATUS, &status);
+  if (!status) {
+    char msg[512];
+    glGetProgramInfoLog(s.handle, 512, NULL, msg);
+    LogFatal(1, "failed to link shader program: %s", msg);
   }
-  destroy(s->uniform_table->uniforms);
-  destroy(s->uniform_table);
-  s->uniform_table = NULL;
+
+  FindShaderUniforms(&s);
+  FindShaderAttribs(&s);
+
+  LogDebug("created shader %d", s.handle);
+
+  return s;
 }
 
-Uniform* shaderGetUniform(const Shader* s, const char* name)
+static uint32_t CompileSource(const char* name, const char* src, uint32_t type)
 {
-  int name_len = strlen(name);
-  Uniform* uniform = findUniform(
-    s->uniform_table->uniforms,
-    s->uniform_table->capacity,
-    name,
-    name_len,
-    hashString(name, name_len)
-  );
-  if (uniform == NULL || uniform->name.chars == NULL) {
-    logError("uniform '%s' does not exist", name);
-    return NULL;
+  uint32_t h = glCreateShader(type);
+  glShaderSource(h, 1, &src, NULL);
+  glCompileShader(h);
+
+  int status;
+  glGetShaderiv(h, GL_COMPILE_STATUS, &status);
+  if (!status) {
+    char msg[512];
+    glGetShaderInfoLog(h, 512, NULL, msg);
+    LogFatal(1, "failed to compile shader '%s': %s", name, msg);
   }
-  return uniform;
+
+  return h;
 }
 
-void shaderSendTexture(const Shader* s, const char* name, Texture tex)
+struct Shader ShaderLoadFromFiles(const char* vert, const char* frag)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, tex.handle);
-  glUniform1i(loc, 0);
+  char* vsrc = ReadFile(vert);
+  char* fsrc = ReadFile(frag);
+  uint32_t vertex_handle = CompileSource(vert, vsrc, GL_VERTEX_SHADER);
+  uint32_t fragment_handle = CompileSource(frag, fsrc, GL_FRAGMENT_SHADER);
+  Destroy(vsrc);
+  Destroy(fsrc);
+
+  return ShaderCreate(vertex_handle, fragment_handle);
 }
 
-void shaderSendFloat(const Shader* s, const char* name, float f)
+struct Shader ShaderLoadFromSource(const char* vert, const char* frag)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniform1f(loc, f);
+  uint32_t vertex_handle = CompileSource("vertex", vert, GL_VERTEX_SHADER);
+  uint32_t fragment_handle = CompileSource("fragment", frag, GL_FRAGMENT_SHADER);
+  return ShaderCreate(vertex_handle, fragment_handle);
 }
 
-void shaderSendVec2f(const Shader* s, const char* name, Vec2f f)
+static struct ShaderVar* GetUniform(struct Shader* s, const char* name)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  glUniform2f(loc, f.x, f.y);
+  uint16_t len = strlen(name);
+  uint32_t hash = HashString(name, len);
+  struct ShaderVar* var =
+    FindShaderVar(s->uniforms.vars, s->uniforms.capacity, name, len, hash);
+  if (var->name == NULL) LogFatal(1, "uniform '%s' does not exist", name);
+  return var;
 }
 
-void shaderSendVec3f(const Shader* s, const char* name, Vec3f f)
+void ShaderSendInt(struct Shader* s, const char* name, int i)
 {
-
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniform3f(loc, f.x, f.y, f.z);
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform1i(ptr->loc, i);
 }
 
-void shaderSendVec4f(const Shader* s, const char* name, Vec4f f)
+void ShaderSendFloat(struct Shader* s, const char* name, float f)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniform4f(loc, f.x, f.y, f.z, f.w);
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform1f(ptr->loc, f);
 }
 
-void shaderSendInt(const Shader* s, const char* name, int i)
+void ShaderSendVec2f(struct Shader* s, const char* name, Vec2f v)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniform1i(loc, i);
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform2f(ptr->loc, v.x, v.y);
 }
 
-void shaderSendVec2i(const Shader* s, const char* name, Vec2i i)
+void ShaderSendVec2i(struct Shader* s, const char* name, Vec2i v)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniform2i(loc, i.x, i.y);
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform2i(ptr->loc, v.x, v.y);
 }
 
-void shaderSendVec3i(const Shader* s, const char* name, Vec3i i)
+void ShaderSendVec3f(struct Shader* s, const char* name, Vec3f v)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniform3i(loc, i.x, i.y, i.z);
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform3i(ptr->loc, v.x, v.y, v.z);
 }
 
-void shaderSendVec4i(const Shader* s, const char* name, Vec4i i)
+void ShaderSendVec3i(struct Shader* s, const char* name, Vec3i v)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniform4i(loc, i.x, i.y, i.z, i.w);
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform3i(ptr->loc, v.x, v.y, v.z);
 }
 
-void shaderSendMat4(const Shader* s, const  char* name, Mat4 mat)
+void ShaderSendVec4f(struct Shader* s, const char* name, Vec4f v)
 {
-  Uniform* uniform = shaderGetUniform(s, name);
-  if (!uniform) return;
-  int loc = uniform->location;
-  shaderUse(s);
-  glUniformMatrix4fv(loc, 1, GL_FALSE, mat);
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform4i(ptr->loc, v.x, v.y, v.z, v.w);
 }
 
-void shaderUse(const Shader* s)
+void ShaderSendVec4i(struct Shader* s, const char* name, Vec4i v)
+{
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniform4i(ptr->loc, v.x, v.y, v.z, v.w);
+}
+
+void ShaderSendMat4(struct Shader* s, const char* name, Mat4 m)
+{
+  struct ShaderVar* ptr = GetUniform(s, name);
+  glUniformMatrix4fv(ptr->loc, 1, GL_FALSE, m);
+}
+
+void ShaderBind(struct Shader* s)
 {
   glUseProgram(s->handle);
+}
+
+void ShaderDestroy(struct Shader* s)
+{
+  glDeleteProgram(s->handle);
+  LogDebug("deleted shader %d", s->handle);
+  s->handle = 0;
+
+  DestroyShaderTable(&s->uniforms);
+  DestroyShaderTable(&s->attrs);
 }

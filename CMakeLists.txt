@@ -18,6 +18,8 @@ else()
 endif()
 
 add_compile_options(
+  -std=c99
+
   -O2
 
   -Wall
@@ -51,37 +53,60 @@ set(
   BSE_SRC
 
   # engine
-  engine/main.c
   engine/include.h
-  engine/mem.h
-  engine/context.c engine/context.h
-  engine/log.c engine/log.h engine/exit_codes.h
-  engine/keys.h
-  engine/luawrap.c engine/luawrap.h
-  engine/renderer.c engine/renderer.h
-  engine/texture.c engine/texture.h
-  engine/shader.c engine/shader.h
-  engine/material.c engine/material.h
+  engine/main.c
+  engine/log.c engine/log.h
+  engine/engine.c engine/engine.h
+  engine/key.h
   engine/mesh.c engine/mesh.h
+  engine/shader.c engine/shader.h
+  engine/image.c engine/image.h
+  engine/texture.c engine/texture.h
   engine/prng.c engine/prng.h
-
-  engine/math/defs.h
   engine/math/mat4.c engine/math/mat4.h
   engine/math/transform.c engine/math/transform.h
-  engine/math/vec2f.h
-  engine/math/vec2i.h
-  engine/math/vec3f.h
-  engine/math/vec3i.h
-  engine/math/vec4f.h
-  engine/math/vec4i.h
 
-  engine/lua/wrap_log.c
-  engine/lua/wrap_context.c
-  engine/lua/wrap_input.c
-  engine/lua/wrap_prng.c
-  engine/lua/wrap_mesh.c
-  engine/lua/wrap_material.c
-  engine/lua/wrap_texture.c
+  engine/wrap/wrap.c engine/wrap/wrap.h
+  engine/wrap/wrap_engine.c
+  engine/wrap/wrap_log.c
+  engine/wrap/wrap_mat4.c
+  engine/wrap/wrap_mesh.c
+  engine/wrap/wrap_mesh_format.c
+  engine/wrap/wrap_shader.c
+  engine/wrap/wrap_texture.c
+  engine/wrap/wrap_prng.c
+  # engine/main.c
+  # engine/include.h
+  # engine/mem.h
+  # engine/context.c engine/context.h
+  # engine/log.c engine/log.h engine/exit_codes.h
+  # engine/keys.h
+  # engine/luawrap.c engine/luawrap.h
+  # engine/renderer.c engine/renderer.h
+  # engine/texture.c engine/texture.h
+  # engine/shader.c engine/shader.h
+  # engine/material.c engine/material.h
+  # engine/mesh.c engine/mesh.h
+  # engine/prng.c engine/prng.h
+  #
+  # engine/math/defs.h
+  # engine/math/mat4.c engine/math/mat4.h
+  # engine/math/transform.c engine/math/transform.h
+  # engine/math/vec2f.h
+  # engine/math/vec2i.h
+  # engine/math/vec3f.h
+  # engine/math/vec3i.h
+  # engine/math/vec4f.h
+  # engine/math/vec4i.h
+  #
+  # engine/lua/wrap_log.c
+  # engine/lua/wrap_context.c
+  # engine/lua/wrap_input.c
+  # engine/lua/wrap_prng.c
+  # engine/lua/wrap_renderer.c
+  # engine/lua/wrap_mesh.c
+  # engine/lua/wrap_material.c
+  # engine/lua/wrap_texture.c
 )
 add_executable(bse ${BSE_SRC})
 target_include_directories(

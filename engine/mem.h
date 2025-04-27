@@ -1,11 +1,14 @@
-#ifndef __bse_mem__
-#define __bse_mem__
+#ifndef __engine_mem__
+#define __engine_mem__
 
-// definitions so I can change the allocator if I so choose
-#define create(T) (T*)malloc(sizeof(T))
-#define createArr(T, size) (T*)malloc(sizeof(T) * (size))
-#define createSized(size) malloc(size)
-#define resizeArr(T, ptr, size) (T*)realloc(ptr, sizeof(T) * (size))
-#define destroy(ptr) free(ptr)
+#include "include.h"
+
+#define GrowCapacity(cap) ((cap) == 0 ? 8 : (cap) * 2)
+#define GrowArray(T, ptr, e) ((T*)realloc(ptr, sizeof(T) * (e)))
+#define GrowVoidArray(size, ptr, e) ((void*)realloc((size) * (e)))
+#define CreateArray(T, e) ((T*)malloc(sizeof(T) * (e)))
+#define CreateVoidArray(size, e) ((void*)malloc((size) * (e)))
+#define Create(T) ((T*)malloc(sizeof(T)))
+#define Destroy(ptr) free(ptr)
 
 #endif

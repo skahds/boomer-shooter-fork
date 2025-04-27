@@ -1,61 +1,51 @@
-#include "context.h"
+#include "include.h"
 
-#include "luawrap.h"
-#include "prng.h"
+#include "engine.h"
+#include "mesh.h"
+#include "shader.h"
+#include "texture.h"
+#include "math/transform.h"
+#include "wrap/wrap.h"
 
-char* readFile(const char* path)
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+struct SimpleVertex
 {
-  FILE* file = fopen(path, "rb");
-  if (file == NULL) {
-    logError("could not open file '%s'", path);
-    return NULL;
-  }
-
-  fseek(file, 0L, SEEK_END);
-  size_t file_size = ftell(file);
-  rewind(file);
-
-  char* buf = createArr(char, file_size + 1);
-  if (buf == NULL) {
-    logError("error: file '%s' too large to read", path);
-    return NULL;
-  }
-
-  size_t bytes_read = fread(buf, sizeof(char), file_size, file);
-  if (bytes_read < file_size) {
-    destroy(buf);
-    logError("error: could not read file '%s'", path);
-    return NULL;
-  }
-
-  buf[bytes_read] = '\0';
-
-  fclose(file);
-  return buf;
-}
+  float x;
+  float y;
+  float z;
+  float u;
+  float v;
+  float r;
+  float g;
+  float b;
+  float a;
+};
 
 int main()
 {
-  Context* ctx = ctxCreate("Boomer Shooter", (Vec2i){320, 240});
+  struct Engine engine;
+  EngineInit(&engine, "Boomer Shooter");
 
-  lua_State* L = initLua();
+  lua_State* L = luaL_newstate();
+  luaL_openlibs(L);
 
-  wrapLog(L);
-  wrapContext(L, ctx);
-  wrapInput(L);
-  wrapMesh(L);
-  wrapMaterial(L);
-  wrapTexture(L);
-  wrapPrng(L);
+  Wrap(L, &engine);
 
-  protectedDoFile(L, "game/main.lua");
+  ProtectedDoFile(L, &engine, "game/main.lua");
 
-  while (ctxShouldDoUpdate(ctx)) {
-    ctxUpdate(ctx);
-    ctxDraw(ctx);
+  while (!EngineIsClosed(&engine))
+  {
+    if (IsKeyDown(&engine, KEY_ESCAPE)) {
+      EngineClose(&engine);
+    }
+
+    EngineUpdate(&engine);
+    EngineDraw(&engine);
   }
 
-  ctxDestroy(ctx);
   lua_close(L);
-  return 0;
+
+  EngineDestroy(&engine);
 }

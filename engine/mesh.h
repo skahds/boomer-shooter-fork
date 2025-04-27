@@ -1,63 +1,54 @@
-#ifndef __bse_mesh__
-#define __bse_mesh__
+#ifndef __engine_mesh__
+#define __engine_mesh__
 
 #include "include.h"
-#include "renderer.h"
-#include "material.h"
-#include "math/vec2f.h"
-#include "math/vec3f.h"
 
-typedef struct
+enum DataType
 {
-  Vec3f position;
-  Vec2f uv;
-  Vec3f normal;
-} SimpleVertex;
+  TYPE_FLOAT,
+  TYPE_INT,
+};
 
-typedef enum
+struct VertAttr
 {
-  AttrType_float,
-  AttrType_int,
-} AttributeType;
+  enum DataType type;
+  int count;
+};
 
-typedef struct
+struct MeshFormat
 {
-  size_t size;
-  AttributeType type;
-  int components;
-} VertexAttribute;
+  struct VertAttr* attrs;
+  uint16_t count;
+  uint16_t capacity;
 
-typedef struct
-{
-  int attr_count;
-  VertexAttribute* attrs;
-  size_t vertex_size;
-} VertexFormat;
+  size_t stride;
+};
 
-typedef struct
+struct Mesh
 {
   void* vertices;
-  int vertices_count;
-
+  uint16_t vertex_count;
   uint16_t* indices;
-  int indices_count;
+  uint16_t index_count;
 
-  int triangle_count;
-
-  VertexFormat format;
-
-  Material material;
+  struct MeshFormat* format;
 
   uint32_t vao;
   uint32_t vbo;
   uint32_t ebo;
-} Mesh;
+};
 
-extern VertexFormat simple_vertex_format;
+enum DataType StringToDataType(const char* str, size_t len);
 
-Mesh meshCreate(Material mat);
-void meshDestroy(Mesh* mesh);
-void meshFinalize(Mesh* mesh, bool is_static);
-void meshDraw(const Renderer* r, Mesh* mesh, Vec3f pos, Vec3f rot);
+size_t GetAttrSize(struct VertAttr attr);
+struct MeshFormat MeshFormatCreate();
+void MeshFormatAddAttr(
+  struct MeshFormat* fmt, enum DataType type, int count);
+void MeshFormatDestroy(struct MeshFormat* fmt);
+
+struct Mesh MeshCreate(struct MeshFormat* fmt);
+void MeshDestroy(struct Mesh* m);
+void MeshFinalize(struct Mesh* m, bool is_static);
+void MeshDraw(struct Mesh* m);
 
 #endif

@@ -4,13 +4,13 @@
 #include "vec3f.h"
 #include "mat4.h"
 
-typedef struct
+struct Transform
 {
   Vec3f pos;
   Vec3f rot;
   Vec3f scale;
-} Transform;
+};
 
-void transformToMatrix(Transform trans, Mat4 mat);
+void TransformToMatrix(struct Transform trans, Mat4 mat);
 
 #endif

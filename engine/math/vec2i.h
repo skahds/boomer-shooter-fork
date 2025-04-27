@@ -1,10 +1,18 @@
 #ifndef __bse_math_vec2i__
 #define __bse_math_vec2i__
 
+#include "include.h"
+
 typedef struct
 {
-  int x;
-  int y;
+  union {
+    int x;
+    int w;
+  };
+  union {
+    int y;
+    int h;
+  };
 } Vec2i;
 
 #endif

@@ -1,33 +1,31 @@
-#ifndef __bse_log__
-#define __bse_log__
+#ifndef __engine_log__
+#define __engine_log__
 
-#ifndef log_info_tag
-# define log_info_tag "[info] "
-#endif
-#ifndef log_error_tag
-# define log_error_tag "[error] "
-#endif
-#ifndef log_warning_tag
-# define log_warning_tag "[warning] "
-#endif
-#ifndef log_fatal_tag
-# define log_fatal_tag "[fatal] "
-#endif
+#include <stdio.h>
 
+// __VA_OPT__ is not portable in C99, might be worth making these inline 
+// functions?
+
+// `logDebug()` should be a no-op in release
 #ifdef bse_debug
-# define logDebugInfo(...) __logInfo(__VA_ARGS__)
+# define stringify2(x) #x
+# define stringify(x) stringify2(x)
+# define LogDebug(fmt, ...) \
+  __Log(stderr, "[debug] [" __FILE__ ":" stringify(__LINE__) "] ", \
+    fmt __VA_OPT__(,) __VA_ARGS__)
 #else
-# define logDebugInfo(...)
+# define logDebug(fmt, ...)
 #endif
 
-#define logInfo(...) __logInfo(__VA_ARGS__)
+#define LogInfo(fmt, ...) \
+  __Log(stdout, "[info] ", fmt __VA_OPT__(,) __VA_ARGS__)
+#define LogWarning(fmt, ...) \
+  __Log(stderr, "[warning] ", fmt __VA_OPT__(,) __VA_ARGS__)
+#define LogError(fmt, ...) \
+  __Log(stderr, "[error] ", fmt __VA_OPT__(,) __VA_ARGS__)
+#define LogFatal(c, fmt, ...) \
+  (__Log(stderr, "[error] ", fmt __VA_OPT__(,) __VA_ARGS__), exit(1))
 
-// info and warning do nothing in release builds
-void __logInfo(const char* fmt, ...);
-void logWarning(const char* fmt, ...);
-void logError(const char* fmt, ...);
-
-// will close the program
-void logFatal(int exit_code, const char* fmt, ...);
+void __Log(FILE* file, const char* tag, const char* fmt, ...);
 
 #endif
