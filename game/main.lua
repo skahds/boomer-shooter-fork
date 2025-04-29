@@ -1,13 +1,15 @@
-local tex = bse.LoadTexture("textures/puzzle_cube.png")
+local tex = core.LoadTexture("textures/puzzle_cube.png")
+tex:SetFilter(core.tex_filter.NEAREST_MIPMAP, core.tex_filter.NEAREST)
+tex:GenerateMipmaps()
 
-local format = bse.CreateMeshFormat()
-format:AddAttr("float", 3) -- position
-format:AddAttr("float", 2) -- uv
-format:AddAttr("float", 4) -- color
+local fmt = core.CreateVertexFormat()
+fmt:AddAttrib("float", 3) -- position
+fmt:AddAttrib("float", 2) -- uv
+fmt:AddAttrib("float", 4) -- color
 
-local shader = bse.LoadShader("vdefault.glsl", "fdefault.glsl")
+local shader = core.LoadShader("vdefault.glsl", "fdefault.glsl")
 
-local cube = bse.CreateMesh(format)
+local cube = core.CreateMesh(fmt)
 cube:SetVertices({
   {-0.5, -0.5, -0.5,  0.0, 0.0,  1, 0.5, 0, 1}, -- orange
   { 0.5, -0.5, -0.5,  1.0, 0.0,  1, 0.5, 0, 1},
@@ -65,7 +67,7 @@ function step()
   t = t + (1/30)
   if t > 1 then
     t = t - 1
-    bse.LogInfo(bse.GetFps(), bse.GetTps())
+    -- bse.LogInfo(bse.GetFps(), bse.GetTps())
   end
 
   r = r + (1/30)
@@ -87,23 +89,23 @@ function draw()
   --   rz = 0,
   -- }
   -- local m = bse.Mat4FromTransform(transform)
-  local pos = bse.Mat4Identity()
+  local pos = core.Mat4Identity()
   pos:Translate(0, 0, -3)
 
-  local drx = bse.Interpolate(prx, rx)
-  local dry = bse.Interpolate(pry, ry)
+  local drx = core.Interpolate(prx, rx)
+  local dry = core.Interpolate(pry, ry)
 
-  local rot = bse.Mat4Identity()
+  local rot = core.Mat4Identity()
   rot:Rotate(drx, dry, 0)
 
   local m = pos:Multiply(rot)
 
-  local v = bse.Mat4Identity()
+  local v = core.Mat4Identity()
 
-  local ww, wh = bse.GetWindowSize()
+  local ww, wh = core.GetWindowSize()
   local a = ww / wh
 
-  local p = bse.Mat4Identity()
+  local p = core.Mat4Identity()
   p:Perspective(45, a, 0.01, 100)
 
   shader:SendMat4("m", m)

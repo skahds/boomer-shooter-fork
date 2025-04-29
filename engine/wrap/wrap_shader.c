@@ -1,6 +1,6 @@
 #include "wrap.h"
 
-#include "shader.h"
+#include "gfx/shader.h"
 #include "mem.h"
 
 static int L_LoadShader(lua_State* L)
@@ -124,7 +124,7 @@ luaL_Reg shader_mt[] = {
 
 void WrapShader(lua_State* L)
 {
-  lua_getglobal(L, "bse");
+  lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, shader_funcs);
 
   luaL_newmetatable(L, SHADER_MT_NAME);

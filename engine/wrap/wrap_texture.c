@@ -1,6 +1,6 @@
 #include "wrap.h"
 
-#include "texture.h"
+#include "gfx/texture.h"
 #include "mem.h"
 
 static int L_LoadTexture(lua_State* L)
@@ -23,6 +23,31 @@ static int L_TextureMt_GetSize(lua_State* L)
   lua_pushinteger(L, tex->width);
   lua_pushinteger(L, tex->height);
   return 2;
+}
+
+static int L_TextureMt_GenerateMipmaps(lua_State* L)
+{
+  struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
+  TextureGenerateMipmaps(tex);
+  return 0;
+}
+
+static int L_TextureMt_SetFilter(lua_State* L)
+{
+  struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
+  enum TextureFilter min = luaL_checkinteger(L, 2);
+  enum TextureFilter mag = luaL_checkinteger(L, 3);
+  TextureSetFilter(tex, min, mag);
+  return 0;
+}
+
+static int L_TextureMt_SetWrap(lua_State* L)
+{
+  struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
+  enum TextureWrap x = luaL_checkinteger(L, 2);
+  enum TextureWrap y = luaL_checkinteger(L, 3);
+  TextureSetWrap(tex, x, y);
+  return 0;
 }
 
 static int L_TextureMt_Bind(lua_State* L)
@@ -49,6 +74,9 @@ static int L_TextureMt__gc(lua_State* L)
 
 luaL_Reg texture_mt[] = {
   {"GetSize", L_TextureMt_GetSize},
+  {"GenerateMipmaps", L_TextureMt_GenerateMipmaps},
+  {"SetFilter", L_TextureMt_SetFilter},
+  {"SetWrap", L_TextureMt_SetWrap},
   {"Bind", L_TextureMt_Bind},
   {"__index", L_TextureMt__index},
   {"__gc", L_TextureMt__gc},
@@ -57,7 +85,7 @@ luaL_Reg texture_mt[] = {
 
 void WrapTexture(lua_State* L)
 {
-  lua_getglobal(L, "bse");
+  lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, texture_funcs);
 
   luaL_newmetatable(L, TEXTURE_MT_NAME);

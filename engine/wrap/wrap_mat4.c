@@ -133,7 +133,7 @@ luaL_Reg mat4_mt[] = {
 
 void WrapMat4(lua_State* L)
 {
-  lua_getglobal(L, "bse");
+  lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, mat4_funcs);
 
   luaL_newmetatable(L, MAT4_MT_NAME);

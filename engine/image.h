@@ -2,7 +2,7 @@
 #define __engine_image__
 
 #include "include.h"
-#include "image_format.h"
+#include "gfx/gfx_types.h"
 
 struct Image
 {

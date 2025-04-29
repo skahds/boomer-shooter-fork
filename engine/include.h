@@ -8,4 +8,7 @@
 
 #include "log.h"
 
+// TODO: Temp, replace with a vfs
+char* ReadFile(const char* path);
+
 #endif

@@ -5,14 +5,8 @@
 
 typedef struct
 {
-  union {
-    int x;
-    int w;
-  };
-  union {
-    int y;
-    int h;
-  };
+  int x;
+  int y;
 } Vec2i;
 
 #endif

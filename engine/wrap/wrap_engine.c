@@ -28,8 +28,8 @@ static int L_GetWindowSize(lua_State* L)
 {
   struct Engine* engine = GetEngine(L);
   Vec2i s = EngineGetWindowSize(engine);
-  lua_pushinteger(L, s.w);
-  lua_pushinteger(L, s.h);
+  lua_pushinteger(L, s.x);
+  lua_pushinteger(L, s.y);
   return 2;
 }
 
@@ -61,7 +61,7 @@ luaL_Reg engine_funcs[] = {
 
 void WrapEngine(lua_State* L)
 {
-  lua_getglobal(L, "bse");
+  lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, engine_funcs);
   lua_pop(L, 1);
 }

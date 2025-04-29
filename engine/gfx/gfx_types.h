@@ -1,0 +1,78 @@
+#ifndef __engine_gfx_gfx_types__
+#define __engine_gfx_gfx_types__
+
+#include "include.h"
+
+enum BufferObjectType
+{
+  BUFFER_ARRAY,
+  BUFFER_INDEX,
+};
+
+enum DrawMode
+{
+  DRAW_STATIC,
+  DRAW_DYNAMIC,
+  DRAW_STREAM,
+};
+
+enum IndexMode
+{
+  INDEX_TRIANGLES,
+  INDEX_TRIANGLE_STRIP,
+  INDEX_TRIANGLE_FAN,
+  INDEX_LINES,
+  INDEX_LINE_STRIP,
+  INDEX_LINE_LOOP,
+  INDEX_POINTS,
+};
+
+enum GfxDataType
+{
+  TYPE_UNKNOWN = 0,
+
+  TYPE_HALF,
+  TYPE_FLOAT,
+  TYPE_DOUBLE,
+
+  TYPE_UCHAR,
+  TYPE_CHAR,
+
+  TYPE_USHORT,
+  TYPE_SHORT,
+
+  TYPE_UINT,
+  TYPE_INT,
+};
+
+enum ImageFormat
+{
+  IMAGE_FORMAT_INVALID = 0,
+  IMAGE_FORMAT_R8,
+  IMAGE_FORMAT_RA8,
+  IMAGE_FORMAT_RGB8,
+  IMAGE_FORMAT_RGBA8,
+};
+
+enum TextureFilter
+{
+  TEXTURE_FILTER_NEAREST,
+  TEXTURE_FILTER_NEAREST_MIPMAP,
+  TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST,
+  TEXTURE_FILTER_LINEAR,
+  TEXTURE_FILTER_LINEAR_MIPMAP,
+  TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST,
+};
+
+enum TextureWrap
+{
+  TEXTURE_WRAP_REPEAT,
+  TEXTURE_WRAP_MIRRORED_REPEAT,
+  TEXTURE_WRAP_CLAMP_EDGE,
+  TEXTURE_WRAP_CLAMP_BORDER,
+};
+
+size_t GetGfxDataTypeSize(enum GfxDataType type);
+enum GfxDataType StringToDataType(const char* str, size_t len);
+
+#endif

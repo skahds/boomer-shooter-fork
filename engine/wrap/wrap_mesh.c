@@ -1,15 +1,16 @@
 #include "wrap.h"
 
-#include "mesh.h"
+#include "gfx/mesh.h"
 #include "mem.h"
+#include "wrap_vertex_format.h"
 
 static int L_CreateMesh(lua_State* L)
 {
-  struct MeshFormat* fmt = 
-    (struct MeshFormat*)ReadLuaData(L, 1, LUA_TYPE_MESH_FORMAT);
+  struct LuaVertexFormat* lua_fmt = 
+    (struct LuaVertexFormat*)ReadLuaData(L, 1, LUA_TYPE_VERTEX_FORMAT);
 
   struct Mesh* mesh = Create(struct Mesh);
-  *mesh = MeshCreate(fmt);
+  *mesh = MeshCreate(&lua_fmt->fmt);
   CreateLuaData(L, mesh, MESH_MT_NAME, LUA_TYPE_MESH);
   return 1;
 }
@@ -24,56 +25,61 @@ static int L_MeshMt_SetVertices(lua_State* L)
   struct Mesh* mesh = (struct Mesh*)ReadLuaData(L, 1, LUA_TYPE_MESH);
   luaL_checktype(L, 2, LUA_TTABLE);
 
-  struct MeshFormat* fmt = mesh->format;
+  struct VertexFormat* fmt = mesh->fmt;
 
-  int vertex_count = lua_objlen(L, 2);
+  size_t vertex_count = lua_objlen(L, 2);
+
+  if (mesh->vertices != NULL) {
+    Destroy(mesh->vertices);
+  }
 
   mesh->vertices = CreateVoidArray(fmt->stride, vertex_count);
   mesh->vertex_count = vertex_count;
 
-  for (int vertex_i = 0; vertex_i < vertex_count; vertex_i++) {
+  for (size_t vertex_i = 0; vertex_i < vertex_count; vertex_i++) {
     lua_pushinteger(L, vertex_i + 1);
-    lua_gettable(L, 2);
+    lua_gettable(L, 2); // index mesh table
     if (lua_type(L, -1) != LUA_TTABLE) {
       Destroy(mesh->vertices);
       luaL_error(L, "vertices must be tables");
     }
 
-    size_t voffset = vertex_i * fmt->stride;
-    int offset = 0;
+    size_t offset = vertex_i * fmt->stride;
+    int index = 1;
 
-    for (uint16_t attr_i = 0; attr_i < fmt->count; attr_i++) {
-      struct VertAttr* attr = &fmt->attrs[attr_i];
-      size_t type_size = GetAttrSize(*attr);
+    for (uint16_t attr_i = 0; attr_i < fmt->attrib_count; attr_i++) {
+      const struct VertexAttrib* attrib = &fmt->attribs[attr_i];
+      size_t type_size = GetGfxDataTypeSize(attrib->type);
 
-      for (int i = 0; i < attr->count; i++) {
-        lua_pushinteger(L, offset + 1);
-        lua_gettable(L, -2);
-        if (lua_type(L, -1) != LUA_TNUMBER) {
-          Destroy(mesh->vertices);
-          luaL_error(
-            L, "currently only numbers are supported values in vertices");
+      for (uint8_t i = 0; i < attrib->components; i++) {
+        lua_pushinteger(L, index); // vertex table pushed back to -2
+        lua_gettable(L, -2); // index vertex table
+
+#define AddAttrib(T, fn) \
+  do { \
+    T f = fn(L, -1); \
+    T* a = mesh->vertices + offset; \
+    *a = f; \
+  } while (false)
+
+        switch (attrib->type) {
+          case TYPE_UNKNOWN: luaL_error(L, "unknown type"); break;
+          case TYPE_HALF: luaL_error(L, "type 'half' not supported"); break;
+          case TYPE_FLOAT: AddAttrib(float, luaL_checknumber); break; 
+          case TYPE_DOUBLE: AddAttrib(double, luaL_checknumber); break;
+          case TYPE_UCHAR: AddAttrib(unsigned char, luaL_checkinteger); break;
+          case TYPE_CHAR: AddAttrib(char, luaL_checkinteger); break;
+          case TYPE_USHORT: AddAttrib(unsigned short, luaL_checkinteger); break;
+          case TYPE_SHORT: AddAttrib(short, luaL_checkinteger); break;
+          case TYPE_UINT: AddAttrib(unsigned int, luaL_checkinteger); break;
+          case TYPE_INT: AddAttrib(int, luaL_checkinteger); break;
         }
 
-        switch (attr->type) {
-          case TYPE_FLOAT: {
-            float f = lua_tonumber(L, -1);
-            lua_pop(L, 1);
-            float* a = mesh->vertices + voffset;
-            *a = f;
-            break;
-          }
-          case TYPE_INT: {
-            int f = lua_tointeger(L, -1);
-            lua_pop(L, 1);
-            int* a = mesh->vertices + voffset;
-            *a = f;
-            break;
-          }
-        }
+#undef AddAttrib
 
-        voffset += type_size;
-        offset++;
+        lua_pop(L, 1);
+        offset += type_size;
+        index++;
       }
     }
   }
@@ -129,7 +135,7 @@ luaL_Reg mesh_mt[] = {
 
 void WrapMesh(lua_State* L)
 {
-  lua_getglobal(L, "bse");
+  lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, mesh_funcs);
 
   luaL_newmetatable(L, MESH_MT_NAME);

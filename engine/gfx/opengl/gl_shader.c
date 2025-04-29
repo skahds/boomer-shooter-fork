@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "gfx/shader.h"
 
 #include <glad/glad.h>
 
@@ -6,143 +6,16 @@
 
 #define UNIFORM_NAME_MAX 512
 
-struct ShaderVar
-{
-  char* name;
-  uint16_t len;
-  uint32_t hash;
-
-  int loc;
-  int count;
-  uint32_t type;
-};
-
-static char* ReadFile(const char* path)
-{
-  FILE* file = fopen(path, "rb");
-  if (file == NULL) {
-    LogError("could not open file '%s'", path);
-    return NULL;
-  }
-
-  fseek(file, 0L, SEEK_END);
-  size_t file_size = ftell(file);
-  rewind(file);
-
-  char* buf = CreateArray(char, file_size + 1);
-  if (buf == NULL) {
-    LogError("error: file '%s' too large to read", path);
-    return NULL;
-  }
-
-  size_t bytes_read = fread(buf, sizeof(char), file_size, file);
-  if (bytes_read < file_size) {
-    Destroy(buf);
-    LogError("error: could not read file '%s'", path);
-    return NULL;
-  }
-
-  buf[bytes_read] = '\0';
-
-  fclose(file);
-
-  LogDebug("loaded file '%s'", path);
-  return buf;
-}
-
-static struct ShaderVar* FindShaderVar(
-  struct ShaderVar* vars, 
-  uint16_t capacity,
-  const char* name,
-  uint16_t name_len,
-  uint32_t name_hash)
-{
-  if (capacity == 0) return NULL;
-
-  uint32_t index = name_hash & (capacity - 1);
-
-  while (true) {
-    struct ShaderVar* var = &vars[index];
-    if (var->name == NULL) {
-      return var;
-    } else if (
-      name_hash == var->hash &&
-      name_len == var->len &&
-      memcmp(name, var->name, name_len) == 0
-    ) {
-      return var;
-    }
-
-    index = (index + 1) & (capacity - 1);
-  }
-}
-
-static void GrowShaderTable(struct ShaderTable* t)
-{
-  uint16_t capacity = GrowCapacity(t->capacity);
-
-  struct ShaderVar* vars = CreateArray(struct ShaderVar, capacity);
-  for (int i = 0; i < capacity; i++) {
-    vars[i].name = NULL;
-  }
-
-  for (int i = 0; i < t->capacity; i++) {
-    struct ShaderVar* var = &t->vars[i];
-    if (var->name == NULL) continue; // empty
-    
-    struct ShaderVar* new_position = FindShaderVar(
-      vars, capacity, var->name, var->len, var->hash);
-    *new_position = *var;
-  }
-
-  Destroy(t->vars);
-  t->vars = vars;
-  t->capacity = capacity;
-}
-
-static void AddShaderVar(struct ShaderTable* t, struct ShaderVar var)
-{
-  if (t->count + 1 > t->capacity * 0.75) {
-    GrowShaderTable(t);
-  }
-
-  struct ShaderVar* ptr = FindShaderVar(
-    t->vars, t->capacity, var.name, var.len, var.hash);
-  *ptr = var;
-  t->count++;
-}
-
-static void DestroyShaderTable(struct ShaderTable* t)
-{
-  for (int i = 0; i < t->capacity; i++) {
-    struct ShaderVar* var = &t->vars[i];
-    if (var->name == NULL) continue;
-    Destroy(var->name);
-  }
-  Destroy(t->vars);
-
-  t->vars = NULL;
-  t->count = 0;
-}
-
-static uint32_t HashString(const char* str, uint16_t len)
-{
-  uint32_t hash = 2166136261u;
-  for (uint16_t i = 0; i < len; i++) {
-    hash ^= (uint8_t)str[i];
-    hash *= 16777619;
-  }
-  return hash;
-}
-
 static void FindShaderUniforms(struct Shader* s)
 {
+  uint32_t handle = *((uint32_t*)s->handle);
+
   s->uniforms.vars = NULL;
   s->uniforms.count = 0;
   s->uniforms.capacity = 0;
 
   int uniform_count;
-  glGetProgramiv(s->handle, GL_ACTIVE_UNIFORMS, &uniform_count);
+  glGetProgramiv(handle, GL_ACTIVE_UNIFORMS, &uniform_count);
 
   for (int i = 0; i < uniform_count; i++) {
     int name_len;
@@ -150,26 +23,28 @@ static void FindShaderUniforms(struct Shader* s)
     struct ShaderVar var;
     var.loc = i;
     glGetActiveUniform(
-       s->handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
+       handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
 
     var.name = CreateArray(char, name_len + 1);
     memcpy(var.name, name, name_len);
     var.name[name_len] = '\0';
     var.len = name_len;
-    var.hash = HashString(name, name_len);
+    var.hash = HashVarName(name, name_len);
 
-    AddShaderVar(&s->uniforms, var);
+    ShaderTableAddVar(&s->uniforms, var);
   }
 }
 
 static void FindShaderAttribs(struct Shader* s)
 {
+  uint32_t handle = *((uint32_t*)s->handle);
+
   s->attrs.vars = NULL;
   s->attrs.count = 0;
   s->attrs.capacity = 0;
 
   int attr_count;
-  glGetProgramiv(s->handle, GL_ACTIVE_ATTRIBUTES, &attr_count);
+  glGetProgramiv(handle, GL_ACTIVE_ATTRIBUTES, &attr_count);
 
   for (int i = 0; i < attr_count; i++) {
     int name_len;
@@ -177,15 +52,15 @@ static void FindShaderAttribs(struct Shader* s)
     struct ShaderVar var;
     var.loc = i;
     glGetActiveAttrib(
-       s->handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
+       handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
 
     var.name = CreateArray(char, name_len + 1);
     memcpy(var.name, name, name_len);
     var.name[name_len] = '\0';
     var.len = name_len;
-    var.hash = HashString(name, name_len);
+    var.hash = HashVarName(name, name_len);
 
-    AddShaderVar(&s->attrs, var);
+    ShaderTableAddVar(&s->attrs, var);
   }
 }
 
@@ -193,27 +68,32 @@ static struct Shader ShaderCreate(uint32_t vert, uint32_t frag)
 {
   struct Shader s;
 
-  s.handle = glCreateProgram();
+  uint32_t handle = glCreateProgram();
 
-  glAttachShader(s.handle, vert);
-  glAttachShader(s.handle, frag);
-  glLinkProgram(s.handle);
+  uint32_t* handle_ptr = Create(uint32_t);
+  *handle_ptr = handle;
+
+  s.handle = handle_ptr;
+
+  glAttachShader(handle, vert);
+  glAttachShader(handle, frag);
+  glLinkProgram(handle);
 
   glDeleteShader(vert);
   glDeleteShader(frag);
 
   int status;
-  glGetProgramiv(s.handle, GL_LINK_STATUS, &status);
+  glGetProgramiv(handle, GL_LINK_STATUS, &status);
   if (!status) {
     char msg[512];
-    glGetProgramInfoLog(s.handle, 512, NULL, msg);
+    glGetProgramInfoLog(handle, 512, NULL, msg);
     LogFatal(1, "failed to link shader program: %s", msg);
   }
 
   FindShaderUniforms(&s);
   FindShaderAttribs(&s);
 
-  LogDebug("created shader %d", s.handle);
+  LogDebug("created shader %d", handle);
 
   return s;
 }
@@ -257,9 +137,14 @@ struct Shader ShaderLoadFromSource(const char* vert, const char* frag)
 static struct ShaderVar* GetUniform(struct Shader* s, const char* name)
 {
   uint16_t len = strlen(name);
-  uint32_t hash = HashString(name, len);
-  struct ShaderVar* var =
-    FindShaderVar(s->uniforms.vars, s->uniforms.capacity, name, len, hash);
+  uint32_t hash = HashVarName(name, len);
+  struct ShaderVar* var = ShaderTableFindVar(
+    s->uniforms.vars,
+    s->uniforms.capacity,
+    name,
+    len,
+    hash
+  );
   if (var->name == NULL) LogFatal(1, "uniform '%s' does not exist", name);
   return var;
 }
@@ -320,15 +205,18 @@ void ShaderSendMat4(struct Shader* s, const char* name, Mat4 m)
 
 void ShaderBind(struct Shader* s)
 {
-  glUseProgram(s->handle);
+  glUseProgram(*((uint32_t*)s->handle));
 }
 
 void ShaderDestroy(struct Shader* s)
 {
-  glDeleteProgram(s->handle);
-  LogDebug("deleted shader %d", s->handle);
-  s->handle = 0;
+  uint32_t handle = *((uint32_t*)s->handle);
+  glDeleteProgram(handle);
+  LogDebug("destroyed shader %d", handle);
 
-  DestroyShaderTable(&s->uniforms);
-  DestroyShaderTable(&s->attrs);
+  ShaderTableDestroy(&s->uniforms);
+  ShaderTableDestroy(&s->attrs);
+
+  Destroy(s->handle);
+  s->handle = NULL;
 }

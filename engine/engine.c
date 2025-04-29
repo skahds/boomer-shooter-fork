@@ -1,11 +1,12 @@
 #include "engine.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "gfx/gfx.h"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-  glViewport(0, 0, width, height);
+  AdjustViewport((Vec2f){width, height});
 }
 
 void EngineInit(struct Engine* engine, const char* window_title)
@@ -23,11 +24,7 @@ void EngineInit(struct Engine* engine, const char* window_title)
   }
   LogInfo("created glfw window");
 
-  glfwMakeContextCurrent(engine->window_handle);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    LogFatal(1, "could not initialize glad");
-  }
+  InitBackend(engine);
 
   glfwSetFramebufferSizeCallback(
     engine->window_handle, FramebufferSizeCallback);
@@ -42,8 +39,6 @@ void EngineInit(struct Engine* engine, const char* window_title)
   engine->prev_time = 0;
   engine->last_fps = 0;
   engine->frames_rendered = 0;
-
-  glEnable(GL_DEPTH_TEST);
 }
 
 void EngineDestroy(struct Engine* engine)
@@ -51,7 +46,12 @@ void EngineDestroy(struct Engine* engine)
   LogInfo("destroying engine...");
 
   glfwDestroyWindow(engine->window_handle);
+  // for some reason this causes a false positive(?) memory leak with asan.
+  // but i fairly sure it doesn't actually, but i'm keeping it off for debug
+  // builds regardless for my own sanity
+#ifndef bse_debug
   glfwTerminate();
+#endif
 
   engine->window_handle = NULL;
 }
@@ -99,8 +99,7 @@ void EngineUpdate(struct Engine* engine)
 
 void EngineDraw(struct Engine* engine)
 {
-  glClearColor(0.2, 0.2, 0.2, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  ClearBackground(0.2, 0.2, 0.2);
 
   if (engine->L != NULL) {
     lua_getglobal(engine->L, "draw");
@@ -135,7 +134,7 @@ bool EngineIsClosed(struct Engine* engine)
 Vec2i EngineGetWindowSize(struct Engine* engine)
 {
   Vec2i size;
-  glfwGetWindowSize(engine->window_handle, &size.w, &size.h);
+  glfwGetWindowSize(engine->window_handle, &size.x, &size.y);
   return size;
 }
 

@@ -1,5 +1,5 @@
-#ifndef __engine_shader__
-#define __engine_shader__
+#ifndef __engine_gfx_shader__
+#define __engine_gfx_shader__
 
 #include "include.h"
 #include "math/vec2f.h"
@@ -11,6 +11,17 @@
 #include "math/mat4.h"
 #include "texture.h"
 
+struct ShaderVar
+{
+  char* name;
+  uint16_t len;
+  uint32_t hash;
+
+  int loc;
+  int count;
+  uint32_t type;
+};
+
 struct ShaderTable
 {
   struct ShaderVar* vars;
@@ -20,10 +31,21 @@ struct ShaderTable
 
 struct Shader
 {
-  uint32_t handle;
+  void* handle;
   struct ShaderTable uniforms;
   struct ShaderTable attrs;
 };
+
+void ShaderTableAddVar(struct ShaderTable* t, struct ShaderVar var);
+struct ShaderVar* ShaderTableFindVar(
+  struct ShaderVar* vars, 
+  uint16_t capacity,
+  const char* name,
+  uint16_t name_len,
+  uint32_t name_hash
+);
+void ShaderTableDestroy(struct ShaderTable* t);
+uint32_t HashVarName(const char* name, uint16_t len);
 
 struct Shader ShaderLoadFromFiles(const char* vert, const char* frag);
 struct Shader ShaderLoadFromSource(const char* vert, const char* frag);

@@ -96,7 +96,7 @@ luaL_Reg prng_mt[] = {
 
 void WrapPrng(lua_State* L)
 {
-  lua_getglobal(L, "bse");
+  lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, prng_funcs);
 
   luaL_newmetatable(L, PRNG_MT_NAME);

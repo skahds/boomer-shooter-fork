@@ -56,7 +56,7 @@ luaL_Reg log_funcs[] = {
 
 void WrapLog(lua_State* L)
 {
-  lua_getglobal(L, "bse");
+  lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, log_funcs);
   lua_pop(L, 1);
 }

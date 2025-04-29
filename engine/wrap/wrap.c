@@ -22,7 +22,7 @@ static int L_ErrorHandler(lua_State* L)
   if (lua_isstring(L, -1)) {
     LogError("%s", lua_tostring(L, -1));
   } else {
-    LogError("%s", lua_tostring(L, 1));
+    LogError("%s\n(stack trace unavailable)", lua_tostring(L, 1));
   }
   lua_close(L);
   exit(1);
@@ -37,7 +37,7 @@ static const char* DataTypeToString(enum LuaDataType type)
     case LUA_TYPE_IMAGE: return "Image";
     case LUA_TYPE_TEXTURE: return "Texture";
     case LUA_TYPE_MESH: return "Mesh";
-    case LUA_TYPE_MESH_FORMAT: return "Format";
+    case LUA_TYPE_VERTEX_FORMAT: return "VertexFormat";
     case LUA_TYPE_SHADER: return "Shader";
     case LUA_TYPE_MAT4: return "Mat4";
     case LUA_TYPE_PRNG: return "Prng";
@@ -96,10 +96,10 @@ void RegisterFunctions(lua_State* L, const luaL_Reg* funcs)
 void ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file)
 {
   if (luaL_dofile(L, file) != LUA_OK) {
-    LogFatal(1, "%s", lua_tostring(L, -1));
+    lua_pushcfunction(L, L_ErrorHandler);
+    lua_pushvalue(L, -2);
+    lua_call(L, 1, 0);
   }
-  // luaL_loadfile(L, file) ||
-  //   lua_pcall(L, 0, LUA_MULTRET, engine->lua_error_handler_index);
 }
 
 void Wrap(lua_State* L, struct Engine* engine)
@@ -110,13 +110,14 @@ void Wrap(lua_State* L, struct Engine* engine)
   engine->lua_error_handler_index = lua_gettop(L);
 
   lua_newtable(L);
-  lua_setglobal(L, "bse");
+  lua_setglobal(L, CORE_NAME);
 
   WrapEngine(L);
+  WrapEnums(L);
   WrapTexture(L);
   WrapLog(L);
   WrapShader(L);
-  WrapMeshFormat(L);
+  WrapVertexFormat(L);
   WrapMesh(L);
   WrapMat4(L);
   WrapPrng(L);
