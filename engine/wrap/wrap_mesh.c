@@ -47,7 +47,7 @@ static int L_MeshMt_SetVertices(lua_State* L)
     size_t offset = vertex_i * fmt->stride;
     int index = 1;
 
-    for (uint16_t attr_i = 0; attr_i < fmt->attrib_count; attr_i++) {
+    for (size_t attr_i = 0; attr_i < fmt->attrib_count; attr_i++) {
       const struct VertexAttrib* attrib = &fmt->attribs[attr_i];
       size_t type_size = GetGfxDataTypeSize(attrib->type);
 
