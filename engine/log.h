@@ -3,10 +3,8 @@
 
 #include <stdio.h>
 
-// __VA_OPT__ is not portable in C99, might be worth making these inline 
+// FIXME: __VA_OPT__ is not portable in C99, might be worth making these inline 
 // functions?
-
-// `logDebug()` should be a no-op in release
 
 #define TEXT_NORMAL "\033[0m"
 #define TEXT_BOLD_GREEN "\033[32;1m"
@@ -14,6 +12,7 @@
 #define TEXT_BOLD_RED "\033[31;1m"
 #define TEXT_DARK_GRAY "\033[90m"
 
+// `logDebug()` should be a no-op in release
 #ifdef bse_debug
 # define stringify2(x) #x
 # define stringify(x) stringify2(x)
@@ -23,7 +22,7 @@
     __FILE__ ":" stringify(__LINE__) TEXT_NORMAL "] ", \
     fmt __VA_OPT__(,) __VA_ARGS__)
 #else
-# define logDebug(fmt, ...)
+# define LogDebug(fmt, ...)
 #endif
 
 #define LogInfo(fmt, ...) \
