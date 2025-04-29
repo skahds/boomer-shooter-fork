@@ -44,7 +44,7 @@
   (__Log( \
          stderr, \
          "[" TEXT_BOLD_RED "error" TEXT_NORMAL "] ", \
-         fmt __VA_OPT__(,) __VA_ARGS__), exit(1))
+         fmt __VA_OPT__(,) __VA_ARGS__), exit(c))
 
 void __Log(FILE* file, const char* tag, const char* fmt, ...);
 

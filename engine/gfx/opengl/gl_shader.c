@@ -87,7 +87,7 @@ static struct Shader ShaderCreate(uint32_t vert, uint32_t frag)
   if (!status) {
     char msg[512];
     glGetProgramInfoLog(handle, 512, NULL, msg);
-    LogFatal(1, "failed to link shader program: %s", msg);
+    LogFatal(1, "[" TEXT_DARK_GRAY "shader" TEXT_NORMAL "] link error: %s", msg);
   }
 
   FindShaderUniforms(&s);
@@ -109,7 +109,7 @@ static uint32_t CompileSource(const char* name, const char* src, uint32_t type)
   if (!status) {
     char msg[512];
     glGetShaderInfoLog(h, 512, NULL, msg);
-    LogFatal(1, "failed to compile shader '%s': %s", name, msg);
+    LogFatal(1, "[" TEXT_DARK_GRAY "shader" TEXT_NORMAL"] %s: %s", name, msg);
   }
 
   return h;
@@ -129,8 +129,17 @@ struct Shader ShaderLoadFromFiles(const char* vert, const char* frag)
 
 struct Shader ShaderLoadFromSource(const char* vert, const char* frag)
 {
-  uint32_t vertex_handle = CompileSource("vertex", vert, GL_VERTEX_SHADER);
-  uint32_t fragment_handle = CompileSource("fragment", frag, GL_FRAGMENT_SHADER);
+  uint32_t vertex_handle = CompileSource(
+    "embedded vertex",
+    vert,
+    GL_VERTEX_SHADER
+  );
+  uint32_t fragment_handle = CompileSource(
+    "embedded fragment",
+    frag,
+    GL_FRAGMENT_SHADER
+  );
+
   return ShaderCreate(vertex_handle, fragment_handle);
 }
 
