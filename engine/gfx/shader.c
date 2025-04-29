@@ -6,9 +6,9 @@
 
 struct ShaderVar* ShaderTableFindVar(
   struct ShaderVar* vars, 
-  uint16_t capacity,
+  size_t capacity,
   const char* name,
-  uint16_t name_len,
+  size_t name_len,
   uint32_t name_hash)
 {
   if (capacity == 0) return NULL;
@@ -33,14 +33,14 @@ struct ShaderVar* ShaderTableFindVar(
 
 static void GrowShaderTable(struct ShaderTable* t)
 {
-  uint16_t capacity = GrowCapacity(t->capacity);
+  size_t capacity = GrowCapacity(t->capacity);
 
   struct ShaderVar* vars = CreateArray(struct ShaderVar, capacity);
-  for (int i = 0; i < capacity; i++) {
+  for (size_t i = 0; i < capacity; i++) {
     vars[i].name = NULL;
   }
 
-  for (int i = 0; i < t->capacity; i++) {
+  for (size_t i = 0; i < t->capacity; i++) {
     struct ShaderVar* var = &t->vars[i];
     if (var->name == NULL) continue; // empty
     
@@ -78,7 +78,7 @@ void ShaderTableAddVar(struct ShaderTable* t, struct ShaderVar var)
 
 void ShaderTableDestroy(struct ShaderTable* t)
 {
-  for (int i = 0; i < t->capacity; i++) {
+  for (size_t i = 0; i < t->capacity; i++) {
     struct ShaderVar* var = &t->vars[i];
     if (var->name == NULL) continue;
     Destroy(var->name);
@@ -89,10 +89,10 @@ void ShaderTableDestroy(struct ShaderTable* t)
   t->count = 0;
 }
 
-uint32_t HashVarName(const char* str, uint16_t len)
+uint32_t HashVarName(const char* str, size_t len)
 {
   uint32_t hash = 2166136261u;
-  for (uint16_t i = 0; i < len; i++) {
+  for (size_t i = 0; i < len; i++) {
     hash ^= (uint8_t)str[i];
     hash *= 16777619;
   }

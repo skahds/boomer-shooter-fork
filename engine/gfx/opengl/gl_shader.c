@@ -136,7 +136,7 @@ struct Shader ShaderLoadFromSource(const char* vert, const char* frag)
 
 static struct ShaderVar* GetUniform(struct Shader* s, const char* name)
 {
-  uint16_t len = strlen(name);
+  size_t len = strlen(name);
   uint32_t hash = HashVarName(name, len);
   struct ShaderVar* var = ShaderTableFindVar(
     s->uniforms.vars,

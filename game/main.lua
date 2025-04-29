@@ -80,15 +80,6 @@ end
 function draw()
   shader:Bind()
 
-  -- local transform = {
-  --   x = 0,
-  --   y = 0,
-  --   z = -2,
-  --   rx = bse.GetTotalTime() * 0.25,
-  --   ry = bse.GetTotalTime(),
-  --   rz = 0,
-  -- }
-  -- local m = bse.Mat4FromTransform(transform)
   local pos = core.Mat4Identity()
   pos:Translate(0, 0, -3)
 

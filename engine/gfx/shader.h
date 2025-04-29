@@ -14,7 +14,7 @@
 struct ShaderVar
 {
   char* name;
-  uint16_t len;
+  size_t len;
   uint32_t hash;
 
   int loc;
@@ -25,8 +25,8 @@ struct ShaderVar
 struct ShaderTable
 {
   struct ShaderVar* vars;
-  uint16_t count;
-  uint16_t capacity;
+  size_t count;
+  size_t capacity;
 };
 
 struct Shader
@@ -39,13 +39,13 @@ struct Shader
 void ShaderTableAddVar(struct ShaderTable* t, struct ShaderVar var);
 struct ShaderVar* ShaderTableFindVar(
   struct ShaderVar* vars, 
-  uint16_t capacity,
+  size_t capacity,
   const char* name,
-  uint16_t name_len,
+  size_t name_len,
   uint32_t name_hash
 );
 void ShaderTableDestroy(struct ShaderTable* t);
-uint32_t HashVarName(const char* name, uint16_t len);
+uint32_t HashVarName(const char* name, size_t len);
 
 struct Shader ShaderLoadFromFiles(const char* vert, const char* frag);
 struct Shader ShaderLoadFromSource(const char* vert, const char* frag);
