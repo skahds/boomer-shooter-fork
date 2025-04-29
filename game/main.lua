@@ -1,6 +1,6 @@
 local tex = core.LoadTexture("textures/puzzle_cube.png")
-tex:SetFilter(core.tex_filter.LINEAR_MIPMAP, core.tex_filter.NEAREST)
-tex:GenerateMipmaps()
+tex:SetFilter(core.tex_filter.NEAREST, core.tex_filter.NEAREST)
+-- tex:GenerateMipmaps()
 
 local fmt = core.CreateVertexFormat()
 fmt:AddAttrib("float", 3) -- position
@@ -77,28 +77,34 @@ function step()
   ry = r
 end
 
+local cubet = {
+  x = 0,
+  y = 0,
+  z = -3,
+  rx = 0,
+  ry = 0,
+  rz = 0,
+  sx = 1,
+  sz = 1,
+  sy = 1,
+}
+
 function draw()
   shader:Bind()
 
-  -- local transform = {
-  --   x = 0,
-  --   y = 0,
-  --   z = -2,
-  --   rx = bse.GetTotalTime() * 0.25,
-  --   ry = bse.GetTotalTime(),
-  --   rz = 0,
-  -- }
-  -- local m = bse.Mat4FromTransform(transform)
-  local pos = core.Mat4Identity()
-  pos:Translate(0, 0, -3)
-
-  local drx = core.Interpolate(prx, rx)
-  local dry = core.Interpolate(pry, ry)
-
-  local rot = core.Mat4Identity()
-  rot:Rotate(drx, dry, 0)
-
-  local m = pos:Multiply(rot)
+  cubet.rx = core.Interpolate(prx, rx)
+  cubet.ry = core.Interpolate(pry, ry)
+  local m = core.Mat4FromTransform(cubet)
+  -- local pos = core.Mat4Identity()
+  -- pos:Translate(0, 0, -3)
+  --
+  -- local drx = core.Interpolate(prx, rx)
+  -- local dry = core.Interpolate(pry, ry)
+  --
+  -- local rot = core.Mat4Identity()
+  -- rot:Rotate(drx, dry, 0)
+  --
+  -- local m = pos:Multiply(rot)
 
   local v = core.Mat4Identity()
 

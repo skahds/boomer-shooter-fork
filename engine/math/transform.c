@@ -16,6 +16,7 @@ void TransformToMatrix(struct Transform trans, Mat4 mat)
   Mat4 inter;
   // mat4Multiply(inter, translation, rotation);
 
-  Mat4Multiply(inter, scale, rotation);
+  // translation * rotation * scale
+  Mat4Multiply(inter, rotation, scale);
   Mat4Multiply(mat, translation, inter);
 }

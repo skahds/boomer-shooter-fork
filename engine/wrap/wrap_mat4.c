@@ -1,6 +1,8 @@
 #include "wrap.h"
 
 #include "math/mat4.h"
+#include "math/transform.h"
+#include "math/vec3f.h"
 #include "mem.h"
 
 static int L_Mat4Identity(lua_State* L)
@@ -13,8 +15,45 @@ static int L_Mat4Identity(lua_State* L)
 
 static int L_Mat4FromTransform(lua_State* L)
 {
+  luaL_checktype(L, 1, LUA_TTABLE);
+
+  lua_getfield(L, 1, "x");
+  float x = luaL_optnumber(L, -1, 0);
+  lua_pop(L, 1);
+  lua_getfield(L, 1, "y");
+  float y = luaL_optnumber(L, -1, 0);
+  lua_pop(L, 1);
+  lua_getfield(L, 1, "z");
+  float z = luaL_optnumber(L, -1, 0);
+  lua_pop(L, 1);
+
+  lua_getfield(L, 1, "rx");
+  float rx = luaL_optnumber(L, -1, 0);
+  lua_pop(L, 1);
+  lua_getfield(L, 1, "ry");
+  float ry = luaL_optnumber(L, -1, 0);
+  lua_pop(L, 1);
+  lua_getfield(L, 1, "rz");
+  float rz = luaL_optnumber(L, -1, 0);
+  lua_pop(L, 1);
+
+  lua_getfield(L, 1, "sx");
+  float sx = luaL_optnumber(L, -1, 1);
+  lua_pop(L, 1);
+  lua_getfield(L, 1, "sy");
+  float sy = luaL_optnumber(L, -1, 1);
+  lua_pop(L, 1);
+  lua_getfield(L, 1, "sz");
+  float sz = luaL_optnumber(L, -1, 1);
+  lua_pop(L, 1);
+
+  struct Transform trans;
+  trans.pos = (Vec3f){x, y, z};
+  trans.rot = (Vec3f){rx, ry, rz};
+  trans.scale = (Vec3f){sx, sy, sz};
+
   struct LuaMat4* m = Create(struct LuaMat4);
-  Mat4Identity(m->m);
+  TransformToMatrix(trans, m->m);
   CreateLuaData(L, m, MAT4_MT_NAME, LUA_TYPE_MAT4);
   return 1;
 }

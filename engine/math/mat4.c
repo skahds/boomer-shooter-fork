@@ -39,10 +39,6 @@ void Mat4Rotate(Mat4 mat, Vec3f rotation)
   float cosz = cosf(rotation.z);
   float sinz = sinf(rotation.z);
 
-  // Vec3f ra = (Vec3f){0, 1, 0};
-
-  // mat4Identity(mat);
-
   mat[0] = cosy * cosz;
   mat[1] = cosy * sinz;
   mat[2] = -siny;

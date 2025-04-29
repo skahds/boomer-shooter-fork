@@ -42,7 +42,7 @@ static int L_LogError(lua_State* L)
 static int L_LogFatal(lua_State* L)
 {
   CatArgs(L, 2);
-  LogFatal(lua_checkinteger(L, 1), "%s", lua_tostring(L, -1));
+  LogFatal(luaL_checkinteger(L, 1), "%s", lua_tostring(L, -1));
   return 0;
 }
 
