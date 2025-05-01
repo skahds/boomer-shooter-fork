@@ -20,8 +20,8 @@ luaL_Reg texture_funcs[] = {
 static int L_TextureMt_GetSize(lua_State* L)
 {
   struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
-  lua_pushinteger(L, tex->width);
-  lua_pushinteger(L, tex->height);
+  lua_pushinteger(L, tex->size.x);
+  lua_pushinteger(L, tex->size.y);
   return 2;
 }
 

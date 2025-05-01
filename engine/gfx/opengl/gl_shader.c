@@ -214,7 +214,9 @@ void ShaderSendMat4(struct Shader* s, const char* name, Mat4 m)
 
 void ShaderBind(struct Shader* s)
 {
-  glUseProgram(*((uint32_t*)s->handle));
+  uint32_t handle = 0;
+  if (s != NULL) handle = *((uint32_t*)s->handle);
+  glUseProgram(handle);
 }
 
 void ShaderDestroy(struct Shader* s)

@@ -9,8 +9,7 @@ struct Texture TextureLoadFromImg(struct Image* img)
 {
   struct Texture tex;
 
-  tex.width = img->width;
-  tex.height = img->height;
+  tex.size = img->size;
   tex.format = img->format;
 
   uint32_t gl_format = ImageFormatToOpenGl(img->format);
@@ -21,7 +20,7 @@ struct Texture TextureLoadFromImg(struct Image* img)
   glBindTexture(GL_TEXTURE_2D, handle);
   glTexImage2D(
     GL_TEXTURE_2D,
-    0, gl_format, tex.width, tex.height,
+    0, gl_format, tex.size.x, tex.size.y,
     0, gl_format, GL_UNSIGNED_BYTE, img->data);
 
   LogDebug("loaded texture %d", handle);
@@ -39,8 +38,10 @@ struct Texture TextureLoadFromImg(struct Image* img)
 
 void TextureBind(struct Texture* tex, uint8_t slot)
 {
+  uint32_t handle = 0;
+  if (tex != NULL) handle = *((uint32_t*)tex->handle);
   glActiveTexture(GL_TEXTURE0 + slot);
-  glBindTexture(GL_TEXTURE_2D, *((uint32_t*)tex->handle));
+  glBindTexture(GL_TEXTURE_2D, handle);
 }
 
 void TextureGenerateMipmaps(struct Texture* tex)

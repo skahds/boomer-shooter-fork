@@ -4,12 +4,12 @@
 #include "include.h"
 #include "gfx/gfx_types.h"
 #include "image.h"
+#include "math/vec2i.h"
 
 struct Texture
 {
   void* handle;
-  int width;
-  int height;
+  Vec2i size;
   enum ImageFormat format;
   enum TextureFilter min_filter;
   enum TextureFilter mag_filter;

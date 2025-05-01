@@ -19,6 +19,11 @@ void BufferObjectBind(struct BufferObject* buf)
   glBindBuffer(BufferObjectTypeToOpenGl(buf->type), buf->handle);
 }
 
+void BufferObjectUnbind(enum BufferObjectType type)
+{
+  glBindBuffer(BufferObjectTypeToOpenGl(type), 0);
+}
+
 void BufferObjectSet(
   struct BufferObject* buf,
   void* data,

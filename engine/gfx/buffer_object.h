@@ -8,6 +8,7 @@ struct BufferObject;
 
 struct BufferObject* BufferObjectCreate(enum BufferObjectType type);
 void BufferObjectBind(struct BufferObject* buf);
+void BufferObjectUnbind(enum BufferObjectType type);
 void BufferObjectSet(
   struct BufferObject* buf,
   void* data,

@@ -17,28 +17,25 @@ static enum ImageFormat ImageFormatFromChannelCount(int channels)
 
 struct Image ImageLoad(const char* path)
 {
-  int width;
-  int height;
+  Vec2i size;
   int channel_count;
-  uint8_t* data = stbi_load(path, &width, &height, &channel_count, 0);
+  uint8_t* data = stbi_load(path, &size.x, &size.y, &channel_count, 0);
 
   enum ImageFormat format = ImageFormatFromChannelCount(channel_count);
 
   LogDebug("loading image '%s'", path);
 
-  return ImageLoadFromMemory(data, width, height, format);
+  return ImageLoadFromMemory(data, size, format);
 }
 
 struct Image ImageLoadFromMemory(
   uint8_t* data,
-  int width,
-  int height,
+  Vec2i size,
   enum ImageFormat format)
 {
   struct Image img;
   img.data = data;
-  img.width = width;
-  img.height = height;
+  img.size = size;
   img.format = format;
   return img;
 }
@@ -47,7 +44,6 @@ void ImageDestroy(struct Image* img)
 {
   Destroy(img->data);
   img->data = NULL;
-  img->width = 0;
-  img->height = 0;
+  img->size = (Vec2i){0, 0};
   img->format = IMAGE_FORMAT_INVALID;
 }

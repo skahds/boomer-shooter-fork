@@ -39,7 +39,9 @@ struct VertexArray* VertexArrayCreate(const struct VertexFormat* fmt)
 
 void VertexArrayBind(struct VertexArray* varr)
 {
-  glBindVertexArray(varr->handle);
+  uint32_t handle = 0;
+  if (varr != NULL) handle = varr->handle;
+  glBindVertexArray(handle);
 }
 
 void VertexArrayDestroy(struct VertexArray* varr)
