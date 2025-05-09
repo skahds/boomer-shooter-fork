@@ -7,12 +7,25 @@
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-  // AdjustViewport((Vec2f){width, height});
   struct Engine* engine = (struct Engine*)glfwGetWindowUserPointer(window);
-  Vec2i screen_size = (Vec2i){
-    ceil((float)width / engine->screen_scaling),
-    ceil((float)height / engine->screen_scaling),
-  };
+
+  float screen_width = engine->target_screen_size.x;
+  float screen_height = engine->target_screen_size.y;
+
+  if (width > height) { // the width should change dynamically
+    float target_aspect = (float)screen_width / (float)screen_height;
+    float aspect = (float)width / (float)height;
+    LogInfo("width aspect: %f", aspect / target_aspect);
+    screen_width *= aspect / target_aspect;
+  } else { // the height should change dynamically
+    float target_aspect = (float)screen_height / (float)screen_width;
+    float aspect = (float)height / (float)width;
+    LogInfo("height aspect: %f", aspect / target_aspect);
+    screen_height *= aspect / target_aspect;
+  }
+
+  Vec2i screen_size = (Vec2i){ceil(screen_width), ceil(screen_height)};
+
   engine->screen_size = screen_size;
   FramebufferResize(engine->screen, screen_size);
 }
@@ -43,7 +56,7 @@ void EngineInit(struct Engine* engine, const char* window_title)
   engine->lua_error_handler_index = 0;
 
   engine->tick_rate = 30;
-  engine->screen_scaling = 4;
+  engine->target_screen_size = (Vec2i){320, 180};
   engine->accum = 0;
   engine->fps = 0;
   engine->tps = 0;

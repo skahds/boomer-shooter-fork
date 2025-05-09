@@ -14,7 +14,7 @@ struct Engine
   lua_State* L;
   int lua_error_handler_index;
 
-  float screen_scaling;
+  Vec2i target_screen_size;
   struct Framebuffer* screen;
   Vec2i screen_size;
 
