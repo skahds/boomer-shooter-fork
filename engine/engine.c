@@ -15,12 +15,10 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
   if (width > height) { // the width should change dynamically
     float target_aspect = (float)screen_width / (float)screen_height;
     float aspect = (float)width / (float)height;
-    LogInfo("width aspect: %f", aspect / target_aspect);
     screen_width *= aspect / target_aspect;
   } else { // the height should change dynamically
     float target_aspect = (float)screen_height / (float)screen_width;
     float aspect = (float)height / (float)width;
-    LogInfo("height aspect: %f", aspect / target_aspect);
     screen_height *= aspect / target_aspect;
   }
 
