@@ -72,6 +72,11 @@ enum TextureWrap
   TEXTURE_WRAP_CLAMP_BORDER,
 };
 
+#define FRAMEBUFFER_COLOR_BUF (1 << 0)
+#define FRAMEBUFFER_DEPTH_BUF (1 << 1)
+#define FRAMEBUFFER_DEPTH_MASK_BUF (1 << 2)
+#define FRAMEBUFFER_DRAWABLE (1 << 3)
+
 size_t GetGfxDataTypeSize(enum GfxDataType type);
 enum GfxDataType StringToDataType(const char* str, size_t len);
 

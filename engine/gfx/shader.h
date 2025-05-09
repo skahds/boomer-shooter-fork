@@ -29,12 +29,7 @@ struct ShaderTable
   size_t capacity;
 };
 
-struct Shader
-{
-  void* handle;
-  struct ShaderTable uniforms;
-  struct ShaderTable attrs;
-};
+struct Shader;
 
 void ShaderTableAddVar(struct ShaderTable* t, struct ShaderVar var);
 struct ShaderVar* ShaderTableFindVar(
@@ -47,8 +42,8 @@ struct ShaderVar* ShaderTableFindVar(
 void ShaderTableDestroy(struct ShaderTable* t);
 uint32_t HashVarName(const char* name, size_t len);
 
-struct Shader ShaderLoadFromFiles(const char* vert, const char* frag);
-struct Shader ShaderLoadFromSource(const char* vert, const char* frag);
+struct Shader* ShaderLoadFromFiles(const char* vert, const char* frag);
+struct Shader* ShaderLoadFromSource(const char* vert, const char* frag);
 void ShaderSendInt(struct Shader* s, const char* name, int i);
 void ShaderSendFloat(struct Shader* s, const char* name, float f);
 void ShaderSendVec2f(struct Shader* s, const char* name, Vec2f v);

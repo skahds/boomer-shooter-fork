@@ -29,7 +29,7 @@ void EngineDestroy(struct Engine* engine);
 bool EngineIsInit(struct Engine* engine);
 
 void EngineUpdate(struct Engine* engine);
-void EngineDraw(struct Engine* engine);
+void EngineDraw(struct Engine* engine, Vec2i vp_size);
 
 void EngineSwapBuffers(struct Engine* engine);
 void EngineClose(struct Engine* engine);

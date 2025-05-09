@@ -7,5 +7,6 @@
 void InitBackend(struct Engine* engine);
 void ClearBackground(float r, float g, float b);
 void AdjustViewport(Vec2f size);
+void SetDepthTest(bool test);
 
 #endif

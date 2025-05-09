@@ -7,8 +7,7 @@ static int L_LoadShader(lua_State* L)
 {
   const char* vert_path = luaL_checkstring(L, 1);
   const char* frag_path = luaL_checkstring(L, 2);
-  struct Shader* shader = Create(struct Shader);
-  *shader = ShaderLoadFromFiles(vert_path, frag_path);
+  struct Shader* shader = ShaderLoadFromFiles(vert_path, frag_path);
   CreateLuaData(L, shader, SHADER_MT_NAME, LUA_TYPE_SHADER);
   return 1;
 }
@@ -17,8 +16,7 @@ static int L_LoadShaderFromSource(lua_State* L)
 {
   const char* vert_src = luaL_checkstring(L, 1);
   const char* frag_src = luaL_checkstring(L, 2);
-  struct Shader* shader = Create(struct Shader);
-  *shader = ShaderLoadFromSource(vert_src, frag_src);
+  struct Shader* shader = ShaderLoadFromSource(vert_src, frag_src);
   CreateLuaData(L, shader, SHADER_MT_NAME, LUA_TYPE_SHADER);
   return 1;
 }
@@ -108,7 +106,6 @@ static int L_ShaderMt__gc(lua_State* L)
 {
   struct Shader* shader = (struct Shader*)ReadLuaData(L, 1, LUA_TYPE_SHADER);
   ShaderDestroy(shader);
-  Destroy(shader);
   return 0;
 }
 

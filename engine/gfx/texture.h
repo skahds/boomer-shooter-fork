@@ -6,6 +6,7 @@
 #include "image.h"
 #include "math/vec2i.h"
 
+// TODO: make this consistent with other implementation-defined stuff
 struct Texture
 {
   void* handle;

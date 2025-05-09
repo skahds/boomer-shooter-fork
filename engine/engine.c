@@ -6,7 +6,7 @@
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-  AdjustViewport((Vec2f){width, height});
+  // AdjustViewport((Vec2f){width, height});
 }
 
 void EngineInit(struct Engine* engine, const char* window_title)
@@ -97,8 +97,10 @@ void EngineUpdate(struct Engine* engine)
   }
 }
 
-void EngineDraw(struct Engine* engine)
+void EngineDraw(struct Engine* engine, Vec2i vp_size)
 {
+  AdjustViewport((Vec2f){vp_size.x, vp_size.y});
+
   ClearBackground(0.2, 0.2, 0.2);
 
   if (engine->L != NULL) {

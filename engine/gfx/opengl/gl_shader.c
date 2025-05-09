@@ -1,4 +1,4 @@
-#include "gfx/shader.h"
+#include "gl_shader.h"
 
 #include <glad/glad.h>
 
@@ -8,14 +8,12 @@
 
 static void FindShaderUniforms(struct Shader* s)
 {
-  uint32_t handle = *((uint32_t*)s->handle);
-
   s->uniforms.vars = NULL;
   s->uniforms.count = 0;
   s->uniforms.capacity = 0;
 
   int uniform_count;
-  glGetProgramiv(handle, GL_ACTIVE_UNIFORMS, &uniform_count);
+  glGetProgramiv(s->handle, GL_ACTIVE_UNIFORMS, &uniform_count);
 
   for (int i = 0; i < uniform_count; i++) {
     int name_len;
@@ -23,7 +21,7 @@ static void FindShaderUniforms(struct Shader* s)
     struct ShaderVar var;
     var.loc = i;
     glGetActiveUniform(
-       handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
+       s->handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
 
     var.name = CreateArray(char, name_len + 1);
     memcpy(var.name, name, name_len);
@@ -37,14 +35,12 @@ static void FindShaderUniforms(struct Shader* s)
 
 static void FindShaderAttribs(struct Shader* s)
 {
-  uint32_t handle = *((uint32_t*)s->handle);
-
   s->attrs.vars = NULL;
   s->attrs.count = 0;
   s->attrs.capacity = 0;
 
   int attr_count;
-  glGetProgramiv(handle, GL_ACTIVE_ATTRIBUTES, &attr_count);
+  glGetProgramiv(s->handle, GL_ACTIVE_ATTRIBUTES, &attr_count);
 
   for (int i = 0; i < attr_count; i++) {
     int name_len;
@@ -52,7 +48,7 @@ static void FindShaderAttribs(struct Shader* s)
     struct ShaderVar var;
     var.loc = i;
     glGetActiveAttrib(
-       handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
+       s->handle, i, UNIFORM_NAME_MAX, &name_len, &var.count, &var.type, name);
 
     var.name = CreateArray(char, name_len + 1);
     memcpy(var.name, name, name_len);
@@ -64,16 +60,13 @@ static void FindShaderAttribs(struct Shader* s)
   }
 }
 
-static struct Shader ShaderCreate(uint32_t vert, uint32_t frag)
+static struct Shader* ShaderCreate(uint32_t vert, uint32_t frag)
 {
-  struct Shader s;
+  struct Shader* s = Create(struct Shader);
 
   uint32_t handle = glCreateProgram();
 
-  uint32_t* handle_ptr = Create(uint32_t);
-  *handle_ptr = handle;
-
-  s.handle = handle_ptr;
+  s->handle = handle;
 
   glAttachShader(handle, vert);
   glAttachShader(handle, frag);
@@ -90,8 +83,8 @@ static struct Shader ShaderCreate(uint32_t vert, uint32_t frag)
     LogFatal(1, "[" TEXT_DARK_GRAY "shader" TEXT_NORMAL "] link error: %s", msg);
   }
 
-  FindShaderUniforms(&s);
-  FindShaderAttribs(&s);
+  FindShaderUniforms(s);
+  FindShaderAttribs(s);
 
   LogDebug("created shader %d", handle);
 
@@ -115,7 +108,7 @@ static uint32_t CompileSource(const char* name, const char* src, uint32_t type)
   return h;
 }
 
-struct Shader ShaderLoadFromFiles(const char* vert, const char* frag)
+struct Shader* ShaderLoadFromFiles(const char* vert, const char* frag)
 {
   char* vsrc = ReadFile(vert);
   char* fsrc = ReadFile(frag);
@@ -127,7 +120,7 @@ struct Shader ShaderLoadFromFiles(const char* vert, const char* frag)
   return ShaderCreate(vertex_handle, fragment_handle);
 }
 
-struct Shader ShaderLoadFromSource(const char* vert, const char* frag)
+struct Shader* ShaderLoadFromSource(const char* vert, const char* frag)
 {
   uint32_t vertex_handle = CompileSource(
     "embedded vertex",
@@ -215,19 +208,17 @@ void ShaderSendMat4(struct Shader* s, const char* name, Mat4 m)
 void ShaderBind(struct Shader* s)
 {
   uint32_t handle = 0;
-  if (s != NULL) handle = *((uint32_t*)s->handle);
+  if (s != NULL) handle = s->handle;
   glUseProgram(handle);
 }
 
 void ShaderDestroy(struct Shader* s)
 {
-  uint32_t handle = *((uint32_t*)s->handle);
-  glDeleteProgram(handle);
-  LogDebug("destroyed shader %d", handle);
+  glDeleteProgram(s->handle);
+  LogDebug("destroyed shader %d", s->handle);
 
   ShaderTableDestroy(&s->uniforms);
   ShaderTableDestroy(&s->attrs);
 
-  Destroy(s->handle);
-  s->handle = NULL;
+  Destroy(s);
 }

@@ -13,6 +13,9 @@ void InitBackend(struct Engine* engine)
   LogInfo("initialized glad");
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  glFrontFace(GL_CW);
 }
 
 void ClearBackground(float r, float g, float b)
@@ -24,4 +27,10 @@ void ClearBackground(float r, float g, float b)
 void AdjustViewport(Vec2f size)
 {
   glViewport(0, 0, size.x, size.y);
+}
+
+void SetDepthTest(bool test)
+{
+  if (test) glEnable(GL_DEPTH_TEST);
+  else glDisable(GL_DEPTH_TEST);
 }

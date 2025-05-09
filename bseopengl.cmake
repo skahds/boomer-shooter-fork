@@ -7,6 +7,7 @@ set(
   engine/gfx/opengl/gl_vertex_array.c engine/gfx/opengl/gl_vertex_array.h
   engine/gfx/opengl/gl_shader.c
   engine/gfx/opengl/gl_texture.c
+  engine/gfx/opengl/gl_framebuffer.c engine/gfx/opengl/gl_framebuffer.h
 )
 
 add_library(bseopengl STATIC ${OPENGL_BACKEND_SRC})

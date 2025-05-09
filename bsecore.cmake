@@ -20,6 +20,7 @@ set(
   engine/gfx/shader.c engine/gfx/shader.h
   engine/gfx/mesh.c engine/gfx/mesh.h
   engine/gfx/texture.c engine/gfx/texture.h
+  engine/gfx/framebuffer.h
 
   # lua wrapper
   engine/wrap/wrap.c engine/wrap/wrap.h
