@@ -35,7 +35,6 @@ void BufferObjectSet(
   glBindBuffer(type, buf->handle);
   glBufferData(type, size, data, gl_mode);
   glBindBuffer(type, 0);
-  LogDebug("uploaded data to buffer object %d", buf->handle);
 }
 
 void BufferObjectDestroy(struct BufferObject* buf)

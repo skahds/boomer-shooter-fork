@@ -9,6 +9,67 @@
 
 struct Shader* framebuffer_draw_shader = NULL;
 
+static void GenerateTexture(
+  struct Framebuffer* fb,
+  uint32_t* handle, 
+  GLenum internal,
+  GLenum format,
+  GLenum type)
+{
+  glGenTextures(1, handle);
+  glBindTexture(GL_TEXTURE_2D, *handle);
+  glTexImage2D(
+    GL_TEXTURE_2D,
+    0,
+    internal,
+    fb->size.x,
+    fb->size.y,
+    0,
+    format,
+    type,
+    NULL
+  );
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glFramebufferTexture2D(
+    GL_FRAMEBUFFER,
+    GL_COLOR_ATTACHMENT0,
+    GL_TEXTURE_2D,
+    fb->color_handle,
+    0
+  );
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void GenerateTextures(struct Framebuffer* fb)
+{
+  if (fb->flags & FRAMEBUFFER_COLOR_BUF) {
+    GenerateTexture(fb, &fb->color_handle, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+  }
+
+  // TODO: maybe make depth/stencil use renderbuffers? they're faster when not 
+  // being read and i doubt i'll be doing much reading from these
+  if (fb->flags & FRAMEBUFFER_DEPTH_MASK_BUF) {
+    GenerateTexture(
+      fb,
+      &fb->z_mask_handle,
+      GL_DEPTH24_STENCIL8,
+      GL_DEPTH_STENCIL,
+      GL_UNSIGNED_INT_24_8
+    );
+  } else if (fb->flags & FRAMEBUFFER_DEPTH_BUF) {
+    GenerateTexture(
+      fb,
+      &fb->z_mask_handle,
+      GL_DEPTH_COMPONENT32F,
+      GL_DEPTH_COMPONENT,
+      GL_FLOAT
+    );
+  }
+}
+
 struct Framebuffer* FramebufferCreate(Vec2i size, uint8_t flags)
 {
   struct Framebuffer* fb = Create(struct Framebuffer);
@@ -24,91 +85,7 @@ struct Framebuffer* FramebufferCreate(Vec2i size, uint8_t flags)
 
   glBindFramebuffer(GL_FRAMEBUFFER, fb->fb_handle);
 
-  if (flags & FRAMEBUFFER_COLOR_BUF) {
-    glGenTextures(1, &fb->color_handle);
-    glBindTexture(GL_TEXTURE_2D, fb->color_handle);
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      GL_RGB,
-      size.x,
-      size.y,
-      0,
-      GL_RGB,
-      GL_UNSIGNED_BYTE,
-      NULL
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glFramebufferTexture2D(
-      GL_FRAMEBUFFER,
-      GL_COLOR_ATTACHMENT0,
-      GL_TEXTURE_2D,
-      fb->color_handle,
-      0
-    );
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-  }
-
-  if (flags & FRAMEBUFFER_DEPTH_MASK_BUF) {
-    glGenTextures(1, &fb->z_mask_handle);
-    glBindTexture(GL_TEXTURE_2D, fb->z_mask_handle);
-
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      GL_DEPTH24_STENCIL8,
-      size.x,
-      size.y,
-      0,
-      GL_DEPTH_STENCIL,
-      GL_UNSIGNED_INT_24_8,
-      NULL
-    );
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glFramebufferTexture2D(
-      GL_FRAMEBUFFER,
-      GL_DEPTH_STENCIL_ATTACHMENT,
-      GL_TEXTURE_2D,
-      fb->z_mask_handle,
-      0
-    );
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-  } else if (flags & FRAMEBUFFER_DEPTH_BUF) {
-    glGenTextures(1, &fb->z_mask_handle);
-    glBindTexture(GL_TEXTURE_2D, fb->z_mask_handle);
-
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      GL_DEPTH_COMPONENT32F,
-      size.x,
-      size.y,
-      0,
-      GL_DEPTH_COMPONENT,
-      GL_FLOAT,
-      NULL
-    );
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glFramebufferTexture2D(
-      GL_FRAMEBUFFER,
-      GL_DEPTH_ATTACHMENT,
-      GL_TEXTURE_2D,
-      fb->z_mask_handle,
-      0
-    );
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-  }
+  GenerateTextures(fb);
 
   if (flags & FRAMEBUFFER_DRAWABLE) {
     struct VertexAttrib attribs[] = {
@@ -135,6 +112,10 @@ struct Framebuffer* FramebufferCreate(Vec2i size, uint8_t flags)
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+  LogDebug(
+    "created framebuffer %d (with color tex %d, depth/mask tex %d)",
+    fb->fb_handle, fb->color_handle, fb->z_mask_handle);
+
   return fb;
 }
 
@@ -153,6 +134,22 @@ void FramebufferBind(struct Framebuffer* fb)
   uint32_t handle = 0;
   if (fb != NULL) handle = fb->fb_handle;
   glBindFramebuffer(GL_FRAMEBUFFER, handle);
+}
+
+void FramebufferResize(struct Framebuffer* fb, Vec2i size)
+{
+  if (fb->color_handle != 0) glDeleteTextures(1, &fb->color_handle);
+  if (fb->z_mask_handle != 0) glDeleteTextures(1, &fb->z_mask_handle);
+
+  fb->size = size;
+
+  glBindFramebuffer(GL_FRAMEBUFFER, fb->fb_handle);
+  GenerateTextures(fb);
+
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    LogWarning("framebuffer %d resizing could not be completed", fb->fb_handle);
+  }
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void FramebufferDraw(struct Framebuffer* fb, Vec2i start, Vec2i end)

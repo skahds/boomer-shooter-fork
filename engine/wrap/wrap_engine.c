@@ -33,6 +33,15 @@ static int L_GetWindowSize(lua_State* L)
   return 2;
 }
 
+static int L_GetScreenSize(lua_State* L)
+{
+  struct Engine* engine = GetEngine(L);
+  Vec2i s = EngineGetScreenSize(engine);
+  lua_pushinteger(L, s.x);
+  lua_pushinteger(L, s.y);
+  return 2;
+}
+
 static int L_GetInterpolation(lua_State* L)
 {
   struct Engine* engine = GetEngine(L);
@@ -54,6 +63,7 @@ luaL_Reg engine_funcs[] = {
   {"GetFps", L_GetFps},
   {"GetTps", L_GetTps},
   {"GetWindowSize", L_GetWindowSize},
+  {"GetScreenSize", L_GetScreenSize},
   {"GetInterpolation", L_GetInterpolation},
   {"Interpolate", L_Interpolate},
   {NULL, NULL},

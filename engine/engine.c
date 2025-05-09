@@ -3,10 +3,18 @@
 #include <GLFW/glfw3.h>
 
 #include "gfx/gfx.h"
+#include "math.h"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
   // AdjustViewport((Vec2f){width, height});
+  struct Engine* engine = (struct Engine*)glfwGetWindowUserPointer(window);
+  Vec2i screen_size = (Vec2i){
+    ceil((float)width / engine->screen_scaling),
+    ceil((float)height / engine->screen_scaling),
+  };
+  engine->screen_size = screen_size;
+  FramebufferResize(engine->screen, screen_size);
 }
 
 void EngineInit(struct Engine* engine, const char* window_title)
@@ -26,6 +34,8 @@ void EngineInit(struct Engine* engine, const char* window_title)
 
   InitBackend(engine);
 
+  glfwSetWindowUserPointer(engine->window_handle, engine);
+
   glfwSetFramebufferSizeCallback(
     engine->window_handle, FramebufferSizeCallback);
 
@@ -33,17 +43,31 @@ void EngineInit(struct Engine* engine, const char* window_title)
   engine->lua_error_handler_index = 0;
 
   engine->tick_rate = 30;
+  engine->screen_scaling = 4;
   engine->accum = 0;
   engine->fps = 0;
   engine->tps = 0;
   engine->prev_time = 0;
   engine->last_fps = 0;
   engine->frames_rendered = 0;
+
+  Vec2i window_size = EngineGetWindowSize(engine);
+  engine->screen_size = (Vec2i){
+    ceil((float)window_size.x),
+    ceil((float)window_size.y),
+  };
+
+  engine->screen = FramebufferCreate(
+    engine->screen_size,
+    FRAMEBUFFER_COLOR_BUF | FRAMEBUFFER_DEPTH_BUF | FRAMEBUFFER_DRAWABLE
+  );
 }
 
 void EngineDestroy(struct Engine* engine)
 {
   LogInfo("destroying engine...");
+
+  FramebufferDestroy(engine->screen);
 
   glfwDestroyWindow(engine->window_handle);
   // for some reason this causes a false positive(?) memory leak with asan.
@@ -97,9 +121,13 @@ void EngineUpdate(struct Engine* engine)
   }
 }
 
-void EngineDraw(struct Engine* engine, Vec2i vp_size)
+void EngineDraw(struct Engine* engine)
 {
-  AdjustViewport((Vec2f){vp_size.x, vp_size.y});
+  // Draw to screen
+  FramebufferBind(engine->screen);
+  SetDepthTest(true);
+
+  AdjustViewport((Vec2f){engine->screen_size.x, engine->screen_size.y});
 
   ClearBackground(0.2, 0.2, 0.2);
 
@@ -114,6 +142,16 @@ void EngineDraw(struct Engine* engine, Vec2i vp_size)
   }
 
   EngineSwapBuffers(engine);
+
+  // Draw screen
+  FramebufferBind(NULL);
+  Vec2i wsize = EngineGetWindowSize(engine);
+  AdjustViewport((Vec2f){wsize.x, wsize.y});
+
+  ClearBackground(0, 0, 0);
+  SetDepthTest(false);
+
+  FramebufferDraw(engine->screen, (Vec2i){-1, 1}, (Vec2i){2, -2});
 
   engine->frames_rendered++;
 }
@@ -138,6 +176,11 @@ Vec2i EngineGetWindowSize(struct Engine* engine)
   Vec2i size;
   glfwGetWindowSize(engine->window_handle, &size.x, &size.y);
   return size;
+}
+
+Vec2i EngineGetScreenSize(struct Engine* engine)
+{
+  return engine->screen_size;
 }
 
 bool IsKeyDown(struct Engine* engine, enum Key key)

@@ -67,7 +67,7 @@ function step()
   t = t + (1/30)
   if t > 1 then
     t = t - 1
-    -- bse.LogInfo(bse.GetFps(), bse.GetTps())
+    -- core.LogInfo(core.GetFps(), core.GetTps())
   end
 
   r = r + (1/30)
@@ -95,22 +95,11 @@ function draw()
   cubet.rx = core.Interpolate(prx, rx)
   cubet.ry = core.Interpolate(pry, ry)
   local m = core.Mat4FromTransform(cubet)
-  -- local pos = core.Mat4Identity()
-  -- pos:Translate(0, 0, -3)
-  --
-  -- local drx = core.Interpolate(prx, rx)
-  -- local dry = core.Interpolate(pry, ry)
-  --
-  -- local rot = core.Mat4Identity()
-  -- rot:Rotate(drx, dry, 0)
-  --
-  -- local m = pos:Multiply(rot)
 
   local v = core.Mat4Identity()
 
-  -- local ww, wh = core.GetWindowSize()
-  -- local a = ww / wh
-  local a = 320 / 180
+  local sw, sh = core.GetScreenSize()
+  local a = sw / sh
 
   local p = core.Mat4Identity()
   p:Perspective(45, a, 0.01, 100)
