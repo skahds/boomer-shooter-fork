@@ -2,8 +2,6 @@
 
 #include "engine.h"
 #include "wrap/wrap.h"
-#include "gfx/framebuffer.h"
-#include "gfx/gfx.h"
 
 int main()
 {

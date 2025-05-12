@@ -1,4 +1,4 @@
-local tex = core.LoadTexture("textures/puzzle_cube.png")
+local tex = core.LoadTexture("res/textures/puzzle_cube.png")
 tex:SetFilter(core.tex_filter.NEAREST, core.tex_filter.NEAREST)
 -- tex:GenerateMipmaps()
 
@@ -7,7 +7,7 @@ fmt:AddAttrib("float", 3) -- position
 fmt:AddAttrib("float", 2) -- uv
 fmt:AddAttrib("float", 4) -- color
 
-local shader = core.LoadShader("vdefault.glsl", "fdefault.glsl")
+local shader = core.LoadShader("res/vdefault.glsl", "res/fdefault.glsl")
 
 local cube = core.CreateMesh(fmt)
 cube:SetVertices({

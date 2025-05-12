@@ -2,8 +2,8 @@
 #define __engine_mesh__
 
 #include "include.h"
-#include "gfx/buffer_object.h"
-#include "gfx/vertex_array.h"
+#include "buffer_object.h"
+#include "vertex_array.h"
 
 struct Mesh
 {

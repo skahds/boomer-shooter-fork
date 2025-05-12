@@ -4,6 +4,3 @@
 [submodule "lib/luajit"]
 	path = lib/luajit
 	url = https://luajit.org/git/luajit.git
-[submodule "lib/dawn"]
-	path = lib/dawn
-	url = https://dawn.googlesource.com/dawn

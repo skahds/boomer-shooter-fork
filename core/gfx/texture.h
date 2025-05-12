@@ -2,7 +2,7 @@
 #define __engine_texture__
 
 #include "include.h"
-#include "gfx/gfx_types.h"
+#include "gfx_types.h"
 #include "image.h"
 #include "math/vec2i.h"
 

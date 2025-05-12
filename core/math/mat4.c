@@ -1,5 +1,14 @@
 #include "mat4.h"
 
+void Mat4Identity(Mat4 mat)
+{
+  memset(mat, 0, sizeof(Mat4));
+  mat[0] = 1;
+  mat[5] = 1;
+  mat[10] = 1;
+  mat[15] = 1;
+}
+
 void Mat4Multiply(Mat4 out, Mat4 a, Mat4 b)
 {
   for (int row = 0; row < 4; row++) {

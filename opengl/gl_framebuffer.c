@@ -100,8 +100,8 @@ struct Framebuffer* FramebufferCreate(Vec2i size, uint8_t flags)
 
     if (framebuffer_draw_shader == NULL) {
       framebuffer_draw_shader = ShaderLoadFromFiles(
-        "vfbdraw.glsl",
-        "ffbdraw.glsl"
+        "res/vfbdraw.glsl",
+        "res/ffbdraw.glsl"
       );
     }
   }
