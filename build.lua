@@ -1,6 +1,14 @@
+local defines = {}
+if ctx.config == "debug" then
+  table.insert(defines, "bse_debug")
+else
+  table.insert(defines, "bse_release")
+end
+
 AddTarget("bs", "exe", {
   src = {"main.c"},
   include = {"core", "lib/luajit/src"},
+  define = defines,
   libs = {"bscore", "glfw", "glad", "luajit", "m"},
 })
 
@@ -72,6 +80,7 @@ AddTarget("bscore", "staticlib", {
     "lib/glfw/include",
     "lib/glad/include",
   },
+  define = defines,
   libs = {"m"},
 })
 

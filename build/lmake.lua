@@ -46,6 +46,8 @@ and ctx.config ~= "releasesym" then
   return
 end
 
+print("config: " .. ctx.config)
+
 ctx.target_dir = "bin/" .. ctx.config .. "/"
 ctx.targets = {}
 

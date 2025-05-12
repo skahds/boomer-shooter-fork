@@ -35,6 +35,15 @@ local function GMakeCollectCFlags(target)
     end
   end
 
+  for _, include in ipairs(target.opt.define or {}) do
+    if type(include) == "string" then
+      flags = flags .. "-D" .. include .. " "
+    else
+      LMakeError("invalid type in include for target '" .. target.name .. "'")
+      os.exit(1)
+    end
+  end
+
   if target.type == "staticlib" then
     flags = flags .. "-c "
   elseif target.type == "sharedlib" then
