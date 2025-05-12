@@ -9,7 +9,7 @@ Make sure to clone the repo with submodules, and ensure Lua 5.1 or newer is inst
 $ sh build.sh debug
 $ ./bin/debug/bs
 ```
-The `debug` can be replaced with `release`, and that will enable optimizations,
-if you want optimizations, but don't want to give up symbols, you can use `releasesym`.
+The `debug` can be replaced with `release`, and that will enable optimizations.
+If you want optimizations, but don't want to give up symbols, you can use `releasesym`.
 ### Windows
 Currently not tested, and probably won't work. Will eventually work. Maybe.
