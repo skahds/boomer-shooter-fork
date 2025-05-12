@@ -62,11 +62,8 @@ end
 -- c files should compile to object files, which are what should be used as
 -- dependencies, so this function just takes a file and replaces the extension
 -- with a .o one if it's a c file
-local function ResolveDependencyPath(src_file)
-  if GetFileExt(src_file) ~= "c" then
-    return src_file
-  end
-  return ctx.target_dir .. src_file:gsub("%.([^/\\]*)$", ".o")
+local function ReplaceExt(src_file, ext)
+  return ctx.target_dir .. src_file:gsub("%.([^/\\]*)$", ext)
 end
 
 local function ResolveTargetOutput(target)
@@ -119,25 +116,28 @@ end
 --- Figures out what targets depend on what other targets
 local function ResolveDependencies()
   for _, target in pairs(ctx.targets) do
+    local objs = {}
     local deps = {}
-    local target_deps = {}
+    local d_files = {}
 
     local libs = target.opt.libs or {}
     for _, lib_name in ipairs(libs) do
       if ctx.targets[lib_name] then -- this is not a system library
-        table.insert(target_deps, ctx.targets[lib_name].output)
+        table.insert(deps, ctx.targets[lib_name].output)
       end
     end
 
     local src = target.opt.src or {}
     for _, file in ipairs(src) do
-      if GetFileExt(file) ~= "h" then
-        table.insert(deps, ResolveDependencyPath(file))
+      if GetFileExt(file) == "c" then
+        table.insert(objs, ReplaceExt(file, ".o"))
+        table.insert(d_files, ReplaceExt(file, ".d"))
       end
     end
 
+    target.objs = objs
     target.deps = deps
-    target.target_deps = target_deps
+    target.d_files = d_files
   end
 end
 

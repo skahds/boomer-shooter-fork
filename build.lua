@@ -6,14 +6,8 @@ else
 end
 
 AddTarget("bs", "exe", {
-  src = {"main.c"},
-  include = {"core", "lib/luajit/src"},
-  define = defines,
-  libs = {"bscore", "glfw", "glad", "luajit", "m"},
-})
-
-AddTarget("bscore", "staticlib", {
   src = {
+    "main.c",
     "core/include.c",
     "core/include.h",
     "core/log.c",
@@ -81,7 +75,7 @@ AddTarget("bscore", "staticlib", {
     "lib/glad/include",
   },
   define = defines,
-  libs = {"m"},
+  libs = {"glfw", "glad", "luajit", "m"},
 })
 
 AddTarget("glad", "staticlib", {
