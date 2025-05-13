@@ -18,7 +18,7 @@ elseif os_name == "Windows" then
   table.insert(defines, "bse_windows")
 else
   local err_msg = "Unsupported OS."
-  if os_name == "Mac" then
+  if os_name == "OSX" then
     err_msg = err_msg .. " MacOS might be supported in the future."
   end
   LMakeError(err_msg)
