@@ -1,3 +1,8 @@
+if not jit then
+  LMakeError("ensure you're using LuaJIT. build will not work with regular Lua")
+  os.exit(1)
+end
+
 function LMakeError(msg)
   io.stderr:write(msg .. "\n")
 end
@@ -82,6 +87,11 @@ local function ResolveTargetOutput(target)
     )
     return ctx.target_dir .. target.name
   end
+end
+
+-- https://gist.github.com/soulik/82e9d02a818ce12498d1
+function GetOS()
+  return jit.os, jit.arch
 end
 
 function SetTargetDir(dir)

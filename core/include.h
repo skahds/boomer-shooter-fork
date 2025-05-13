@@ -8,6 +8,15 @@
 
 #include "log.h"
 
+#ifdef bse_linux
+# define bse_os_str "linux"
+#else
+// put windows second so it takes slightly longer to compile on windows
+# ifdef bse_windows
+#  define bse_os_str "windows"
+# endif
+#endif
+
 // TODO: Temp, replace with a vfs
 char* ReadFile(const char* path);
 

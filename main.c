@@ -5,6 +5,8 @@
 
 int main()
 {
+  LogInfo("os: %s", bse_os_str);
+
   struct Engine engine;
   EngineInit(&engine, "Boomer Shooter");
 

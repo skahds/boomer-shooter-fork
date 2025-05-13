@@ -1,11 +1,28 @@
+local os_name = GetOS()
 local defines = {}
 local ldflags = {}
 
 if ctx.config == "debug" then
   table.insert(defines, "bse_debug")
-  table.insert(ldflags, "-fsanitize=address")
+  if os_name == "Linux" then
+    table.insert(ldflags, "-fsanitize=address")
+  end
 else
   table.insert(defines, "bse_release")
+end
+
+if os_name == "Linux" then
+  table.insert(defines, "bse_linux")
+  table.insert(defines, "bse_posix")
+elseif os_name == "Windows" then
+  table.insert(defines, "bse_windows")
+else
+  local err_msg = "Unsupported OS."
+  if os_name == "Mac" then
+    err_msg = err_msg .. " MacOS might be supported in the future."
+  end
+  LMakeError(err_msg)
+  os.exit(1)
 end
 
 AddTarget("bs", "exe", {

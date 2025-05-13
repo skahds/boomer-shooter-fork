@@ -3,7 +3,7 @@
 Currently this is just a 3D renderer, but in the future I want to make it into an actual game.
 
 ## Building
-Make sure to clone the repo with submodules, and ensure Lua 5.1 or newer is installed.
+Make sure to clone the repo with submodules, and ensure LuaJIT is installed.
 ### On Linux
 ```bash
 $ sh build.sh debug
