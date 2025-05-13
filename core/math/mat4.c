@@ -9,6 +9,7 @@ void Mat4Identity(Mat4 mat)
   mat[15] = 1;
 }
 
+// TODO: make dis use simd (SCARY)
 void Mat4Multiply(Mat4 out, Mat4 a, Mat4 b)
 {
   for (int row = 0; row < 4; row++) {
@@ -37,6 +38,7 @@ void Mat4Scale(Mat4 mat, Vec3f scale)
   mat[10] = scale.z;
 }
 
+// TODO: maybe make this rotate about an axis?
 void Mat4Rotate(Mat4 mat, Vec3f rotation)
 {
   float cosx = cosf(rotation.x);

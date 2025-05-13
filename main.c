@@ -10,6 +10,7 @@ int main()
   struct Engine engine;
   EngineInit(&engine, "Boomer Shooter");
 
+  // TODO: move this into core/engine.c
   lua_State* L = luaL_newstate();
   luaL_openlibs(L);
 
