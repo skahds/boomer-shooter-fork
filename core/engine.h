@@ -7,6 +7,7 @@
 #include "key.h"
 #include "math/vec2i.h"
 #include "gfx/framebuffer.h"
+#include "timer.h"
 
 struct Engine
 {
@@ -18,16 +19,7 @@ struct Engine
   struct Framebuffer* screen;
   Vec2i screen_size;
 
-  double tick_rate;
-  double accum;
-
-  int fps;
-  int tps;
-
-  double prev_time;
-  double last_fps;
-  int frames_rendered;
-  int frames_stepped;
+  struct Timer timer;
 };
 
 void EngineInit(struct Engine* engine, const char* window_title);

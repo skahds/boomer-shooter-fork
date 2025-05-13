@@ -53,14 +53,8 @@ void EngineInit(struct Engine* engine, const char* window_title)
   engine->L = NULL;
   engine->lua_error_handler_index = 0;
 
-  engine->tick_rate = 30;
   engine->target_screen_size = (Vec2i){320, 180};
-  engine->accum = 0;
-  engine->fps = 0;
-  engine->tps = 0;
-  engine->prev_time = 0;
-  engine->last_fps = 0;
-  engine->frames_rendered = 0;
+  engine->timer = TimerCreate();
 
   Vec2i window_size = EngineGetWindowSize(engine);
   engine->screen_size = (Vec2i){
@@ -100,25 +94,10 @@ void EngineUpdate(struct Engine* engine)
 {
   glfwPollEvents();
 
-  double current_time = glfwGetTime();
-  double dt = current_time - engine->prev_time;
-  engine->prev_time = current_time;
+  TimerStep(&engine->timer);
 
-  engine->accum += dt;
-
-  while (engine->accum > 1.0 / engine->tick_rate) {
-    engine->accum -= 1.0 / engine->tick_rate;
-    if (engine->accum < 0) engine->accum = 0;
-
-    engine->frames_stepped++;
-    double last_fps_update = current_time - engine->last_fps;
-    if (last_fps_update > 1) {
-      engine->fps = (double)engine->frames_rendered / last_fps_update;
-      engine->tps = (double)engine->frames_stepped / last_fps_update;
-      engine->last_fps = current_time;
-      engine->frames_rendered = 0;
-      engine->frames_stepped = 0;
-    }
+  while (TimerShouldTick(&engine->timer)) {
+    TimerNewTick(&engine->timer);
 
     if (engine->L != NULL) {
       lua_getglobal(engine->L, "step");
@@ -164,7 +143,7 @@ void EngineDraw(struct Engine* engine)
 
   FramebufferDraw(engine->screen, (Vec2i){-1, 1}, (Vec2i){2, -2});
 
-  engine->frames_rendered++;
+  TimerDoneRendering(&engine->timer);
 }
 
 void EngineSwapBuffers(struct Engine* engine)

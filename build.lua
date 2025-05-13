@@ -39,6 +39,8 @@ AddTarget("bs", "exe", {
     "core/image.h",
     "core/prng.c",
     "core/prng.h",
+    "core/timer.c",
+    "core/timer.h",
     "core/gfx/buffer_object.h",
     "core/gfx/framebuffer.h",
     "core/gfx/gfx.h",

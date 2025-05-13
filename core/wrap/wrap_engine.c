@@ -13,14 +13,14 @@ static int L_GetTotalTime(lua_State* L)
 static int L_GetFps(lua_State* L)
 {
   struct Engine* engine = GetEngine(L);
-  lua_pushnumber(L, engine->fps);
+  lua_pushnumber(L, engine->timer.fps);
   return 1;
 }
 
 static int L_GetTps(lua_State* L)
 {
   struct Engine* engine = GetEngine(L);
-  lua_pushnumber(L, engine->tps);
+  lua_pushnumber(L, engine->timer.tps);
   return 1;
 }
 
@@ -45,7 +45,7 @@ static int L_GetScreenSize(lua_State* L)
 static int L_GetInterpolation(lua_State* L)
 {
   struct Engine* engine = GetEngine(L);
-  lua_pushnumber(L, engine->accum / (1.0 / engine->tick_rate));
+  lua_pushnumber(L, engine->timer.accum / (1.0 / engine->timer.tick_rate));
   return 1;
 }
 
@@ -54,7 +54,10 @@ static int L_Interpolate(lua_State* L)
   struct Engine* engine = GetEngine(L);
   double a = luaL_checknumber(L, 1);
   double b = luaL_checknumber(L, 2);
-  lua_pushnumber(L, (b - a) * (engine->accum / (1.0 / engine->tick_rate)) + a);
+  lua_pushnumber(
+    L,
+    (b - a) * (engine->timer.accum / (1.0 / engine->timer.tick_rate)) + a
+  );
   return 1;
 }
 
