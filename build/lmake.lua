@@ -89,7 +89,6 @@ local function ResolveTargetOutput(target)
   end
 end
 
--- https://gist.github.com/soulik/82e9d02a818ce12498d1
 function GetOS()
   return jit.os, jit.arch
 end
