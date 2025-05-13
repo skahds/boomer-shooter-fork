@@ -1,6 +1,9 @@
 local defines = {}
+local ldflags = {}
+
 if ctx.config == "debug" then
   table.insert(defines, "bse_debug")
+  table.insert(ldflags, "-fsanitize=address")
 else
   table.insert(defines, "bse_release")
 end
@@ -75,6 +78,7 @@ AddTarget("bs", "exe", {
     "lib/glad/include",
   },
   define = defines,
+  ldflags = ldflags,
   libs = {"glfw", "glad", "luajit", "m"},
 })
 

@@ -6,11 +6,11 @@ local cflags = {
 
 ctx.cflags = cflags[ctx.config]
 
-local function GMakeVar(name, val)
+local function GenVar(name, val)
   return name .. " = " .. val .. "\n"
 end
 
-local function GMakeCollectCFlags(target)
+local function CollectCFlags(target)
   local flags = ""
 
   for _, flag in ipairs(ctx.cflags) do
@@ -53,6 +53,18 @@ local function GMakeCollectCFlags(target)
   return flags
 end
 
+local function CollectLibs(target)
+  local libs = ""
+  for _, lib in ipairs(target.opt.libs or {}) do
+    if ctx.targets[lib] then
+      libs = libs .. ctx.targets[lib].output .. " "
+    else
+      libs = libs .. "-l" .. lib .. " "
+    end
+  end
+  return libs
+end
+
 local function CollectTable(t)
   local str = ""
   for _, v in ipairs(t) do
@@ -61,7 +73,7 @@ local function CollectTable(t)
   return str
 end
 
-local function GMakeCompile(target)
+local function GenTargetCompilation(target)
   local src = target.output .. ": $(OBJ) $(LIBS)\n"
   src = src .. "\t@$(MKDIR) $(@D)\n"
 
@@ -73,6 +85,7 @@ local function GMakeCompile(target)
       .. " -o " .. target.output
       .. " $(LIBS)"
       .. " $(CFLAGS)"
+      .. " $(LDFLAGS)"
     src = src .. "\n"
 
   elseif target.type == "staticlib" then
@@ -92,6 +105,7 @@ local function GMakeCompile(target)
       .. " -shared -o " .. target.output
       .. " $(LIBS)"
       .. " $(CFLAGS)"
+      .. " $(LDFLAGS)"
     src = src .. "\n"
 
   elseif target.type == "command" then
@@ -111,7 +125,7 @@ local function GMakeCompile(target)
   return src
 end
 
-local function GMakeClean(target)
+local function GenClean(target)
   local clean = "clean:\n"
   clean = clean .. "\t$(RM) " .. target.output .. " $(OBJ)\n"
 
@@ -132,12 +146,12 @@ local function GMakeClean(target)
   return clean
 end
 
-local function GMakePad(n)
+local function Pad(n)
   n = n or 1
   return ("\n"):rep(n)
 end
 
-local function GMakeTargetMakefile(target)
+local function GetTargetMakefilePath(target)
   return ctx.target_dir .. target.name .. ".make"
 end
 
@@ -145,44 +159,45 @@ local function GenerateTarget(target)
   print("generating target '" .. target.name .. "'")
 
   local src = ""
-  src = src .. GMakeVar("CC", "gcc")
-  src = src .. GMakeVar("AR", "ar rcs")
-  src = src .. GMakeVar("RM", "rm -f")
-  src = src .. GMakeVar("MKDIR", "mkdir -p")
-  src = src .. GMakeVar("CD", "cd")
-  src = src .. GMakePad()
-  src = src .. GMakeVar("CFLAGS", GMakeCollectCFlags(target))
-  src = src .. GMakeVar("LIBS", CollectTable(target.libs or {}))
-  src = src .. GMakeVar("OBJ", CollectTable(target.objs))
+  src = src .. GenVar("CC", "gcc")
+  src = src .. GenVar("AR", "ar rcs")
+  src = src .. GenVar("RM", "rm -f")
+  src = src .. GenVar("MKDIR", "mkdir -p")
+  src = src .. GenVar("CD", "cd")
+  src = src .. Pad()
+  src = src .. GenVar("CFLAGS", CollectCFlags(target))
+  src = src .. GenVar("LDFLAGS", CollectTable(target.opt.ldflags or {}))
+  src = src .. GenVar("LIBS", CollectLibs(target))
+  src = src .. GenVar("OBJ", CollectTable(target.objs))
 
-  src = src .. GMakePad(2)
+  src = src .. Pad(2)
 
   src = src .. ".PHONY: default clean\n"
-  src = src .. GMakePad()
+  src = src .. Pad()
 
   src = src .. "default: " .. target.output .. "\n"
-  src = src .. GMakePad()
+  src = src .. Pad()
 
-  src = src .. GMakeCompile(target)
-  src = src .. GMakePad()
+  src = src .. GenTargetCompilation(target)
+  src = src .. Pad()
 
   if target.type ~= "command" then
     src = src .. ctx.target_dir .. "%.o: %.c\n"
       .. "\t@$(MKDIR) $(@D)\n"
       .. "\t@echo \"cc $< -> $@\"\n"
       .. "\t@$(CC) -c $< -o $@ $(CFLAGS) -MMD\n"
-    src = src .. GMakePad()
+    src = src .. Pad()
   end
 
-  src = src .. GMakeClean(target)
+  src = src .. GenClean(target)
 
   src = src .. "-include " .. CollectTable(target.d_files or {})
 
-  local makefile = io.open(GMakeTargetMakefile(target), "w")
+  local makefile = io.open(GetTargetMakefilePath(target), "w")
   if not makefile then
     LMakeError(
       "could not write makefile for '" .. target.name .. "' "
-      .. "at '" .. GMakeTargetMakefile(target) .. "'"
+      .. "at '" .. GetTargetMakefilePath(target) .. "'"
     )
     return
   end
@@ -200,10 +215,10 @@ local function GenerateGMake()
   local src = ""
 
   src = src .. ".PHONY: default all clean\n"
-  src = src .. GMakePad()
+  src = src .. Pad()
 
   src = src .. "default: all\n"
-  src = src .. GMakePad()
+  src = src .. Pad()
 
   src = src .. "all: "
 
@@ -211,18 +226,18 @@ local function GenerateGMake()
     src = src .. target.output .. " "
   end
   src = src .. "\n"
-  src = src .. GMakePad()
+  src = src .. Pad()
 
   for _, target in pairs(ctx.targets) do
     local deps = CollectTable(target.deps)
-    local files = CollectTable(target.src or {})
+    local files = CollectTable(target.opt.src or {})
     src = src .. target.output .. ": " .. deps .. " " .. files
     src = src .. "\n"
     src = src .. "\t@echo \"making " .. target.name .. "\"\n"
     src = src
       .. "\t@$(MAKE) --no-print-directory -f "
-      .. GMakeTargetMakefile(target) .. "\n"
-    src = src .. GMakePad()
+      .. GetTargetMakefilePath(target) .. "\n"
+    src = src .. Pad()
   end
 
   src = src .. "clean:\n"
@@ -230,7 +245,7 @@ local function GenerateGMake()
   for _, target in pairs(ctx.targets) do
     src = src
       .. "\t@$(MAKE) --no-print-directory -f "
-      .. GMakeTargetMakefile(target) .. " clean\n"
+      .. GetTargetMakefilePath(target) .. " clean\n"
   end
 
   local makefile = io.open(ctx.target_dir .. "Makefile", "w")
