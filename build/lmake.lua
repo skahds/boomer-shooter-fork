@@ -24,6 +24,7 @@ do
         LMakeError("invalid parameters, -type expects an arg")
         return
       end
+      i = i + 1
     end
 
     if v == "-config" then
@@ -32,6 +33,7 @@ do
         LMakeError("invalid parameters, -config expects an arg")
         return
       end
+      i = i + 1
     end
 
     if v == "-help" then
