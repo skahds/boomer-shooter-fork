@@ -35,7 +35,7 @@ enum LuaDataType
 
 struct LuaMat4
 {
-  Mat4 m;
+  mat4_t m;
 };
 
 struct LuaData

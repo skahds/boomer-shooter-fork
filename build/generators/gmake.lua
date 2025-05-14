@@ -47,7 +47,7 @@ local function CollectCFlags(target)
   if target.type == "staticlib" then
     flags = flags .. "-c "
   elseif target.type == "sharedlib" then
-    flags = flags .. "-fPIC "
+    flags = flags .. "-fpic "
   end
 
   return flags
@@ -81,11 +81,8 @@ local function GenTargetCompilation(target)
 
     src = src .. "\t@echo \"cc $@\"\n"
     src = src
-      .. "\t@$(CC) $(OBJ)"
-      .. " -o " .. target.output
-      .. " $(LIBS)"
-      .. " $(CFLAGS)"
-      .. " $(LDFLAGS)"
+      .. "\t@$(CC) -o " .. target.output
+      .. " $(OBJ) $(LIBS) $(CFLAGS) $(LDFLAGS)"
     src = src .. "\n"
 
   elseif target.type == "staticlib" then
@@ -101,11 +98,8 @@ local function GenTargetCompilation(target)
 
     src = src .. "\t@echo \"cc $@\"\n"
     src = src
-      .. "\t@$(CC) $(OBJ)"
-      .. " -shared -o " .. target.output
-      .. " $(LIBS)"
-      .. " $(CFLAGS)"
-      .. " $(LDFLAGS)"
+      .. "\t@$(CC) -shared -o " .. target.output
+      .. " $(OBJ) $(LIBS) $(CFLAGS) $(LDFLAGS)"
     src = src .. "\n"
 
   elseif target.type == "command" then

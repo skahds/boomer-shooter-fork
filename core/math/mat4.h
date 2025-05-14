@@ -7,14 +7,14 @@
 #include "vec3f.h"
 #include "include.h"
 
-typedef float Mat4[16];
+typedef float mat4_t[16];
 
-void Mat4Identity(Mat4 mat);
-void Mat4Multiply(Mat4 out, Mat4 a, Mat4 b);
-void Mat4Translate(Mat4 mat, Vec3f trans);
-void Mat4Scale(Mat4 mat, Vec3f scale);
-void Mat4Rotate(Mat4 mat, Vec3f rotation);
-void Mat4Perspective(Mat4 mat, float yfov, float a, float n, float f);
-void Mat4Ortho(Mat4 mat, float l, float r, float b, float t, float n, float f);
+void Mat4Identity(mat4_t mat);
+void Mat4Multiply(mat4_t out, mat4_t a, mat4_t b);
+void Mat4Translate(mat4_t mat, vec3f_t trans);
+void Mat4Scale(mat4_t mat, vec3f_t scale);
+void Mat4Rotate(mat4_t mat, vec3f_t rotation);
+void Mat4Perspective(mat4_t mat, float yfov, float a, float n, float f);
+void Mat4Ortho(mat4_t mat, float l, float r, float b, float t, float n, float f);
 
 #endif

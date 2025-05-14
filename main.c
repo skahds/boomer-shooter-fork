@@ -20,12 +20,7 @@ int main()
 
   while (!EngineIsClosed(&engine))
   {
-    if (IsKeyDown(&engine, KEY_ESCAPE)) {
-      EngineClose(&engine);
-    }
-
     EngineUpdate(&engine);
-
     EngineDraw(&engine);
   }
 

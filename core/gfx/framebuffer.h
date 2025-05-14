@@ -7,10 +7,10 @@
 
 struct Framebuffer;
 
-struct Framebuffer* FramebufferCreate(Vec2i size, uint8_t flags);
+struct Framebuffer* FramebufferCreate(vec2i_t size, uint8_t flags);
 void FramebufferDestroy(struct Framebuffer* fb);
 void FramebufferBind(struct Framebuffer* fb);
-void FramebufferResize(struct Framebuffer* fb, Vec2i size);
-void FramebufferDraw(struct Framebuffer* fb, Vec2i start, Vec2i end);
+void FramebufferResize(struct Framebuffer* fb, vec2i_t size);
+void FramebufferDraw(struct Framebuffer* fb, vec2i_t start, vec2i_t end);
 
 #endif

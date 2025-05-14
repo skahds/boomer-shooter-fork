@@ -10,7 +10,7 @@
 struct Texture
 {
   void* handle;
-  Vec2i size;
+  vec2i_t size;
   enum ImageFormat format;
   enum TextureFilter min_filter;
   enum TextureFilter mag_filter;

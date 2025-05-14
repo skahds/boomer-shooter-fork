@@ -1,0 +1,1 @@
+@PointClass base(PlayerClass) = info_player_start : "Player 1 start" []

@@ -163,43 +163,43 @@ void ShaderSendFloat(struct Shader* s, const char* name, float f)
   glUniform1f(ptr->loc, f);
 }
 
-void ShaderSendVec2f(struct Shader* s, const char* name, Vec2f v)
+void ShaderSendVec2f(struct Shader* s, const char* name, vec2f_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform2f(ptr->loc, v.x, v.y);
 }
 
-void ShaderSendVec2i(struct Shader* s, const char* name, Vec2i v)
+void ShaderSendVec2i(struct Shader* s, const char* name, vec2i_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform2i(ptr->loc, v.x, v.y);
 }
 
-void ShaderSendVec3f(struct Shader* s, const char* name, Vec3f v)
+void ShaderSendVec3f(struct Shader* s, const char* name, vec3f_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform3i(ptr->loc, v.x, v.y, v.z);
 }
 
-void ShaderSendVec3i(struct Shader* s, const char* name, Vec3i v)
+void ShaderSendVec3i(struct Shader* s, const char* name, vec3i_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform3i(ptr->loc, v.x, v.y, v.z);
 }
 
-void ShaderSendVec4f(struct Shader* s, const char* name, Vec4f v)
+void ShaderSendVec4f(struct Shader* s, const char* name, vec4f_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform4i(ptr->loc, v.x, v.y, v.z, v.w);
 }
 
-void ShaderSendVec4i(struct Shader* s, const char* name, Vec4i v)
+void ShaderSendVec4i(struct Shader* s, const char* name, vec4i_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform4i(ptr->loc, v.x, v.y, v.z, v.w);
 }
 
-void ShaderSendMat4(struct Shader* s, const char* name, Mat4 m)
+void ShaderSendMat4(struct Shader* s, const char* name, mat4_t m)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniformMatrix4fv(ptr->loc, 1, GL_FALSE, m);

@@ -8,6 +8,6 @@ typedef struct
   int x;
   int y;
   int z;
-} Vec3i;
+} vec3i_t;
 
 #endif

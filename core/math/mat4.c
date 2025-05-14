@@ -1,8 +1,8 @@
 #include "mat4.h"
 
-void Mat4Identity(Mat4 mat)
+void Mat4Identity(mat4_t mat)
 {
-  memset(mat, 0, sizeof(Mat4));
+  memset(mat, 0, sizeof(mat4_t));
   mat[0] = 1;
   mat[5] = 1;
   mat[10] = 1;
@@ -10,7 +10,7 @@ void Mat4Identity(Mat4 mat)
 }
 
 // TODO: make dis use simd (SCARY)
-void Mat4Multiply(Mat4 out, Mat4 a, Mat4 b)
+void Mat4Multiply(mat4_t out, mat4_t a, mat4_t b)
 {
   for (int row = 0; row < 4; row++) {
     for (int col = 0; col < 4; col++) {
@@ -22,7 +22,7 @@ void Mat4Multiply(Mat4 out, Mat4 a, Mat4 b)
   }
 }
 
-void Mat4Translate(Mat4 mat, Vec3f trans)
+void Mat4Translate(mat4_t mat, vec3f_t trans)
 {
   Mat4Identity(mat);
   mat[12] = trans.x;
@@ -30,7 +30,7 @@ void Mat4Translate(Mat4 mat, Vec3f trans)
   mat[14] = trans.z;
 }
 
-void Mat4Scale(Mat4 mat, Vec3f scale)
+void Mat4Scale(mat4_t mat, vec3f_t scale)
 {
   Mat4Identity(mat);
   mat[0] = scale.x;
@@ -39,7 +39,7 @@ void Mat4Scale(Mat4 mat, Vec3f scale)
 }
 
 // TODO: maybe make this rotate about an axis?
-void Mat4Rotate(Mat4 mat, Vec3f rotation)
+void Mat4Rotate(mat4_t mat, vec3f_t rotation)
 {
   float cosx = cosf(rotation.x);
   float sinx = sinf(rotation.x);
@@ -68,11 +68,11 @@ void Mat4Rotate(Mat4 mat, Vec3f rotation)
   mat[15] = 1;
 }
 
-void Mat4Perspective(Mat4 mat, float yfov, float a, float n, float f)
+void Mat4Perspective(mat4_t mat, float yfov, float a, float n, float f)
 {
   // thank you love2d for letting me continue to not understand how this works
   // https://github.com/love2d/love/blob/main/src/common/Matrix.cpp#L459
-  memset(mat, 0, sizeof(Mat4));
+  memset(mat, 0, sizeof(mat4_t));
 
   float cotan = 1.0 / tanf(yfov * DEG_TO_RAD * 0.5);
 	mat[0] = cotan / a;
@@ -82,7 +82,7 @@ void Mat4Perspective(Mat4 mat, float yfov, float a, float n, float f)
 	mat[14] = 2.0 * n * f / (n - f);
 }
 
-void Mat4Ortho(Mat4 mat, float l, float r, float b, float t, float n, float f)
+void Mat4Ortho(mat4_t mat, float l, float r, float b, float t, float n, float f)
 {
   // https://github.com/love2d/love/blob/main/src/common/Matrix.cpp#L444
   Mat4Identity(mat);

@@ -9,6 +9,6 @@ typedef struct
   int y;
   int z;
   int w;
-} Vec4i;
+} vec4i_t;
 
 #endif

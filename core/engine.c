@@ -22,7 +22,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     screen_height *= aspect / target_aspect;
   }
 
-  Vec2i screen_size = (Vec2i){ceil(screen_width), ceil(screen_height)};
+  vec2i_t screen_size = (vec2i_t){ceil(screen_width), ceil(screen_height)};
 
   engine->screen_size = screen_size;
   FramebufferResize(engine->screen, screen_size);
@@ -53,11 +53,11 @@ void EngineInit(struct Engine* engine, const char* window_title)
   engine->L = NULL;
   engine->lua_error_handler_index = 0;
 
-  engine->target_screen_size = (Vec2i){320, 180};
+  engine->target_screen_size = (vec2i_t){320, 180};
   engine->timer = TimerCreate();
 
-  Vec2i window_size = EngineGetWindowSize(engine);
-  engine->screen_size = (Vec2i){
+  vec2i_t window_size = EngineGetWindowSize(engine);
+  engine->screen_size = (vec2i_t){
     ceil((float)window_size.x),
     ceil((float)window_size.y),
   };
@@ -117,7 +117,7 @@ void EngineDraw(struct Engine* engine)
   FramebufferBind(engine->screen);
   SetDepthTest(true);
 
-  AdjustViewport((Vec2f){engine->screen_size.x, engine->screen_size.y});
+  AdjustViewport((vec2f_t){engine->screen_size.x, engine->screen_size.y});
 
   ClearBackground(0.2, 0.2, 0.2);
 
@@ -135,13 +135,13 @@ void EngineDraw(struct Engine* engine)
 
   // Draw screen
   FramebufferBind(NULL);
-  Vec2i wsize = EngineGetWindowSize(engine);
-  AdjustViewport((Vec2f){wsize.x, wsize.y});
+  vec2i_t wsize = EngineGetWindowSize(engine);
+  AdjustViewport((vec2f_t){wsize.x, wsize.y});
 
   ClearBackground(0, 0, 0);
   SetDepthTest(false);
 
-  FramebufferDraw(engine->screen, (Vec2i){-1, 1}, (Vec2i){2, -2});
+  FramebufferDraw(engine->screen, (vec2i_t){-1, 1}, (vec2i_t){2, -2});
 
   TimerDoneRendering(&engine->timer);
 }
@@ -161,14 +161,14 @@ bool EngineIsClosed(struct Engine* engine)
   return glfwWindowShouldClose(engine->window_handle);
 }
 
-Vec2i EngineGetWindowSize(struct Engine* engine)
+vec2i_t EngineGetWindowSize(struct Engine* engine)
 {
-  Vec2i size;
+  vec2i_t size;
   glfwGetWindowSize(engine->window_handle, &size.x, &size.y);
   return size;
 }
 
-Vec2i EngineGetScreenSize(struct Engine* engine)
+vec2i_t EngineGetScreenSize(struct Engine* engine)
 {
   return engine->screen_size;
 }
@@ -181,4 +181,11 @@ bool IsKeyDown(struct Engine* engine, enum Key key)
 bool IsMouseDown(struct Engine* engine, int btn)
 {
   return glfwGetMouseButton(engine->window_handle, btn - 1) == GLFW_PRESS;
+}
+
+vec2f_t GetMousePosition(struct Engine* engine)
+{
+  double x, y;
+  glfwGetCursorPos(engine->window_handle, &x, &y);
+  return (vec2f_t){x, y};
 }

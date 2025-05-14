@@ -6,11 +6,11 @@
 
 struct Transform
 {
-  Vec3f pos;
-  Vec3f rot;
-  Vec3f scale;
+  vec3f_t pos;
+  vec3f_t rot;
+  vec3f_t scale;
 };
 
-void TransformToMatrix(struct Transform trans, Mat4 mat);
+void TransformToMatrix(struct Transform trans, mat4_t mat);
 
 #endif

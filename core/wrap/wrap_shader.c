@@ -44,9 +44,9 @@ static int L_ShaderMt_SendF(lua_State* L)
 
   switch (arg_count) {
     case 1: ShaderSendFloat(shader, uniform, args[0]); break;
-    case 2: ShaderSendVec2f(shader, uniform, *((Vec2f*)&args)); break;
-    case 3: ShaderSendVec3f(shader, uniform, *((Vec3f*)&args)); break;
-    case 4: ShaderSendVec4f(shader, uniform, *((Vec4f*)&args)); break;
+    case 2: ShaderSendVec2f(shader, uniform, *((vec2f_t*)&args)); break;
+    case 3: ShaderSendVec3f(shader, uniform, *((vec3f_t*)&args)); break;
+    case 4: ShaderSendVec4f(shader, uniform, *((vec4f_t*)&args)); break;
   }
 
   return 0;
@@ -69,9 +69,9 @@ static int L_ShaderMt_SendI(lua_State* L)
 
   switch (arg_count) {
     case 1: ShaderSendInt(shader, uniform, args[0]); break;
-    case 2: ShaderSendVec2i(shader, uniform, *((Vec2i*)&args)); break;
-    case 3: ShaderSendVec3i(shader, uniform, *((Vec3i*)&args)); break;
-    case 4: ShaderSendVec4i(shader, uniform, *((Vec4i*)&args)); break;
+    case 2: ShaderSendVec2i(shader, uniform, *((vec2i_t*)&args)); break;
+    case 3: ShaderSendVec3i(shader, uniform, *((vec3i_t*)&args)); break;
+    case 4: ShaderSendVec4i(shader, uniform, *((vec4i_t*)&args)); break;
   }
 
   return 0;

@@ -55,8 +55,6 @@ cube:SetVertices({
 })
 cube:Finalize(true)
 
-local t = 0
-
 local r = 0
 local prx = 0
 local pry = 0
@@ -64,10 +62,12 @@ local rx = 0
 local ry = 0
 
 function step()
-  t = t + (1/30)
-  if t > 1 then
-    t = t - 1
-    -- core.LogInfo(core.GetFps(), core.GetTps())
+  if core.IsKeyDown(core.key.ESCAPE) then
+    core.CloseEngine()
+  end
+
+  if core.IsKeyDown(core.key.SPACE) then
+    core.LogInfo(core.GetFps(), core.GetTps())
   end
 
   r = r + (1/30)

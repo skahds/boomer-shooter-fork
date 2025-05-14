@@ -9,6 +9,6 @@ typedef struct
   float y;
   float z;
   float w;
-} Vec4f;
+} vec4f_t;
 
 #endif

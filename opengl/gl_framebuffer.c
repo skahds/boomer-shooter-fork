@@ -70,7 +70,7 @@ static void GenerateTextures(struct Framebuffer* fb)
   }
 }
 
-struct Framebuffer* FramebufferCreate(Vec2i size, uint8_t flags)
+struct Framebuffer* FramebufferCreate(vec2i_t size, uint8_t flags)
 {
   struct Framebuffer* fb = Create(struct Framebuffer);
 
@@ -136,7 +136,7 @@ void FramebufferBind(struct Framebuffer* fb)
   glBindFramebuffer(GL_FRAMEBUFFER, handle);
 }
 
-void FramebufferResize(struct Framebuffer* fb, Vec2i size)
+void FramebufferResize(struct Framebuffer* fb, vec2i_t size)
 {
   if (fb->color_handle != 0) glDeleteTextures(1, &fb->color_handle);
   if (fb->z_mask_handle != 0) glDeleteTextures(1, &fb->z_mask_handle);
@@ -152,7 +152,7 @@ void FramebufferResize(struct Framebuffer* fb, Vec2i size)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FramebufferDraw(struct Framebuffer* fb, Vec2i start, Vec2i end)
+void FramebufferDraw(struct Framebuffer* fb, vec2i_t start, vec2i_t end)
 {
   if (fb->vbo == NULL || fb->vao == NULL) {
     LogWarning(

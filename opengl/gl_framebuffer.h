@@ -6,7 +6,7 @@
 
 struct Framebuffer
 {
-  Vec2i size;
+  vec2i_t size;
   uint8_t flags;
   uint32_t fb_handle;
   uint32_t color_handle;

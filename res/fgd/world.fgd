@@ -1,0 +1,9 @@
+@SolidClass = worldspawn : "World entity"
+[
+	levelName(string) : "Map name"
+  blockMapSize(integer) : "Block map size" : 1024
+  blockSize(integer) : "Block map block size" : 2
+]
+
+@include "info_player_start.fgd"
+@include "light.fgd"

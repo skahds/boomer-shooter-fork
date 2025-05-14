@@ -1,0 +1,17 @@
+@baseclass color(255 255 40) = Light [
+	light(integer) : "Brightness" : 300
+	wait(integer) : "Fade distance multiplier" : 1
+	delay(choices) : "Attenuation" = [
+		0 : "Linear falloff (Default)"
+	]
+	mangle(string) : "Spotlight angle"
+	style(Choices) : "Appearance" : 0 = [
+		0 : "Normal"
+	]
+]
+
+@PointClass base(Light) =
+  light : "Invisible light source"
+[
+  spawnflags(Flags) = [ 1 : "Start off" : 0 ]
+]

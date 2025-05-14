@@ -7,6 +7,6 @@ typedef struct
 {
   float x;
   float y;
-} Vec2f;
+} vec2f_t;
 
 #endif

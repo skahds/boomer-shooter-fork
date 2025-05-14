@@ -48,9 +48,9 @@ static int L_Mat4FromTransform(lua_State* L)
   lua_pop(L, 1);
 
   struct Transform trans;
-  trans.pos = (Vec3f){x, y, z};
-  trans.rot = (Vec3f){rx, ry, rz};
-  trans.scale = (Vec3f){sx, sy, sz};
+  trans.pos = (vec3f_t){x, y, z};
+  trans.rot = (vec3f_t){rx, ry, rz};
+  trans.scale = (vec3f_t){sx, sy, sz};
 
   struct LuaMat4* m = Create(struct LuaMat4);
   TransformToMatrix(trans, m->m);
@@ -83,7 +83,7 @@ static int L_Mat4Mt_Translate(lua_State* L)
   float y = luaL_checknumber(L, 3);
   float z = luaL_checknumber(L, 4);
 
-  Mat4Translate(m->m, (Vec3f){x, y, z});
+  Mat4Translate(m->m, (vec3f_t){x, y, z});
 
   return 0;
 }
@@ -96,7 +96,7 @@ static int L_Mat4Mt_Scale(lua_State* L)
   float y = luaL_checknumber(L, 3);
   float z = luaL_checknumber(L, 4);
 
-  Mat4Scale(m->m, (Vec3f){x, y, z});
+  Mat4Scale(m->m, (vec3f_t){x, y, z});
 
   return 0;
 }
@@ -109,7 +109,7 @@ static int L_Mat4Mt_Rotate(lua_State* L)
   float y = luaL_checknumber(L, 3);
   float z = luaL_checknumber(L, 4);
 
-  Mat4Rotate(m->m, (Vec3f){x, y, z});
+  Mat4Rotate(m->m, (vec3f_t){x, y, z});
 
   return 0;
 }

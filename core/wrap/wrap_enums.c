@@ -1,6 +1,7 @@
 #include "wrap.h"
 
 #include "gfx/gfx_types.h"
+#include "key.h"
 
 struct LuaEnum
 {
@@ -11,6 +12,7 @@ struct LuaEnum
 #define IMAGE_FORMAT_NAME "img_format"
 #define TEXTURE_FILTER_NAME "tex_filter"
 #define TEXTURE_WRAP_NAME "tex_wrap"
+#define KEY_NAME "key"
 
 struct LuaEnum image_format[] = {
   {"R8", IMAGE_FORMAT_R8},
@@ -38,7 +40,17 @@ struct LuaEnum texture_wrap[] = {
   {NULL, 0},
 };
 
-static void RegisterEnum(lua_State* L, const char* name, struct LuaEnum* enooms)
+struct LuaEnum key_wrap[] = {
+#define KEY_DEF(name, _) {#name, KEY_##name},
+#include "key_def.h"
+#undef KEY_DEF
+  {NULL, 0},
+};
+
+static void RegisterEnum(
+  lua_State* L,
+  const char* name,
+  struct LuaEnum* enooms)
 {
   lua_newtable(L);
 
@@ -57,6 +69,7 @@ void WrapEnums(lua_State* L)
   RegisterEnum(L, IMAGE_FORMAT_NAME, image_format);
   RegisterEnum(L, TEXTURE_FILTER_NAME, texture_filter);
   RegisterEnum(L, TEXTURE_WRAP_NAME, texture_wrap);
+  RegisterEnum(L, KEY_NAME, key_wrap);
 
   lua_pop(L, 1);
 }

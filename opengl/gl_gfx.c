@@ -24,7 +24,7 @@ void ClearBackground(float r, float g, float b)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void AdjustViewport(Vec2f size)
+void AdjustViewport(vec2f_t size)
 {
   glViewport(0, 0, size.x, size.y);
 }

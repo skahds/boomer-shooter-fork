@@ -6,6 +6,7 @@
 #include "include.h"
 #include "key.h"
 #include "math/vec2i.h"
+#include "math/vec2f.h"
 #include "gfx/framebuffer.h"
 #include "timer.h"
 
@@ -15,9 +16,9 @@ struct Engine
   lua_State* L;
   int lua_error_handler_index;
 
-  Vec2i target_screen_size;
+  vec2i_t target_screen_size;
   struct Framebuffer* screen;
-  Vec2i screen_size;
+  vec2i_t screen_size;
 
   struct Timer timer;
 };
@@ -33,10 +34,12 @@ void EngineSwapBuffers(struct Engine* engine);
 void EngineClose(struct Engine* engine);
 bool EngineIsClosed(struct Engine* engine);
 
-Vec2i EngineGetWindowSize(struct Engine* engine);
-Vec2i EngineGetScreenSize(struct Engine* engine);
+vec2i_t EngineGetWindowSize(struct Engine* engine);
+vec2i_t EngineGetScreenSize(struct Engine* engine);
 
 bool IsKeyDown(struct Engine* engine, enum Key key);
 bool IsMouseDown(struct Engine* engine, int btn);
+
+vec2f_t GetMousePosition(struct Engine* engine);
 
 #endif
