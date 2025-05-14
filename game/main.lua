@@ -55,11 +55,34 @@ cube:SetVertices({
 })
 cube:Finalize(true)
 
+local LerpedNumber_mt = {}
+
+function LerpedNumber_mt:__index(k)
+  if k ~= "val" then
+    error("cannot get any value other than 'val' on a lerped number")
+  end
+
+  return core.Interpolate(rawget(self, "prev"), rawget(self, "val"))
+end
+
+function LerpedNumber_mt:__newindex(k, v)
+  if k ~= "val" then
+    error("cannot set any value other than 'val' on a lerped number")
+  end
+
+  rawset(self, "prev", rawget(self, "val"))
+  rawset(self, "val", v)
+end
+
+local function LerpedNumber(init)
+  local n = setmetatable({}, LerpedNumber_mt)
+  n.val = init or 0
+  return n
+end
+
 local r = 0
-local prx = 0
-local pry = 0
-local rx = 0
-local ry = 0
+local rx = LerpedNumber()
+local ry = LerpedNumber()
 
 function step()
   if core.IsKeyDown(core.key.ESCAPE) then
@@ -71,29 +94,25 @@ function step()
   end
 
   r = r + (1/30)
-  prx = rx
-  pry = ry
-  rx = r * 0.25
-  ry = r
+  rx.val = r * 0.25
+  ry.val = r
 end
-
-local cubet = {
-  x = 0,
-  y = 0,
-  z = -3,
-  rx = 0,
-  ry = 0,
-  rz = 0,
-  sx = 1,
-  sz = 1,
-  sy = 1,
-}
 
 function draw()
   shader:Bind()
 
-  cubet.rx = core.Interpolate(prx, rx)
-  cubet.ry = core.Interpolate(pry, ry)
+  local cubet = {
+    x = 0,
+    y = 0,
+    z = -3,
+    rx = rx.val,
+    ry = ry.val,
+    rz = 0,
+    sx = 1,
+    sz = 1,
+    sy = 1,
+  }
+
   local m = core.Mat4FromTransform(cubet)
 
   local v = core.Mat4Identity()
