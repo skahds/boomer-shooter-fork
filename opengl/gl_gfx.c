@@ -3,6 +3,25 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+static void MessageCallback(
+  GLenum source,
+  GLenum type,
+  GLuint id,
+  GLenum severity,
+  GLsizei length,
+  const GLchar* message,
+  const void* userParam)
+{
+  switch (severity) {
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+      LogDebug("[" TEXT_DARK_GRAY "OpenGL" TEXT_NORMAL "] %s", message);
+      return;
+    default:
+      LogWarning("[" TEXT_DARK_GRAY "OpenGL" TEXT_NORMAL "] %s", message);
+      return;
+  }
+}
+
 void InitBackend(struct Engine* engine)
 {
   glfwMakeContextCurrent(engine->window_handle);
@@ -12,10 +31,16 @@ void InitBackend(struct Engine* engine)
   }
   LogInfo("initialized glad");
 
+#ifdef bse_debug
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback(MessageCallback, 0);
+#endif
+
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  glFrontFace(GL_CW);
+  glDepthFunc(GL_LESS);
+  // glEnable(GL_CULL_FACE);
+  // glCullFace(GL_BACK);
+  // glFrontFace(GL_CW);
 }
 
 void ClearBackground(float r, float g, float b)

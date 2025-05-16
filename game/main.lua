@@ -1,88 +1,87 @@
-local tex = core.LoadTexture("res/textures/puzzle_cube.png")
+package.path = package.path .. ";game/?.lua;game/?/init.lua"
+local gcore = require("core")
+
+local tex = core.LoadTexture("res/textures/bricks.png")
 tex:SetFilter(core.tex_filter.NEAREST, core.tex_filter.NEAREST)
--- tex:GenerateMipmaps()
 
 local fmt = core.CreateVertexFormat()
 fmt:AddAttrib("float", 3) -- position
+fmt:AddAttrib("float", 3) -- normal
 fmt:AddAttrib("float", 2) -- uv
 fmt:AddAttrib("float", 4) -- color
 
 local shader = core.LoadShader("res/vdefault.glsl", "res/fdefault.glsl")
 
 local cube = core.CreateMesh(fmt)
+local vp = {
+  {0.5, 0.5, -0.5},
+  {0.5, -0.5, -0.5},
+  {0.5, 0.5, 0.5},
+  {0.5, -0.5, 0.5},
+  {-0.5, 0.5, -0.5},
+  {-0.5, -0.5, -0.5},
+  {-0.5, 0.5, 0.5},
+  {-0.5, -0.5, 0.5},
+}
+
+-- 1 2
+-- |/|
+-- 3 4
+
+-- 1 2 3  1 3 4
 cube:SetVertices({
-  {-0.5, -0.5, -0.5,  0, 0,  1, 0.5, 0, 1}, -- orange OK
-  { 0.5, -0.5, -0.5,  1, 0,  1, 0.5, 0, 1},
-  { 0.5,  0.5, -0.5,  1, 1,  1, 0.5, 0, 1},
-  { 0.5,  0.5, -0.5,  1, 1,  1, 0.5, 0, 1},
-  {-0.5,  0.5, -0.5,  0, 1,  1, 0.5, 0, 1},
-  {-0.5, -0.5, -0.5,  0, 0,  1, 0.5, 0, 1},
+  {vp[7][1], vp[7][2], vp[7][3],  0, 1, 0,  1, 1,  1, 1, 1, 1},
+  {vp[5][1], vp[5][2], vp[5][3],  0, 1, 0,  1, 0,  1, 1, 1, 1},
+  {vp[1][1], vp[1][2], vp[1][3],  0, 1, 0,  0, 0,  1, 1, 1, 1}, -- orange OK
+  {vp[3][1], vp[3][2], vp[3][3],  0, 1, 0,  0, 1,  1, 1, 1, 1},
+  {vp[7][1], vp[7][2], vp[7][3],  0, 1, 0,  1, 1,  1, 1, 1, 1},
+  {vp[1][1], vp[1][2], vp[1][3],  0, 1, 0,  0, 0,  1, 1, 1, 1},
 
-  { 0.5,  0.5,  0.5,  1, 1,  1, 0, 0, 1}, -- 2
-  { 0.5, -0.5,  0.5,  1, 0,  1, 0, 0, 1}, -- 1
-  {-0.5, -0.5,  0.5,  0, 0,  1, 0, 0, 1}, -- red
-  {-0.5, -0.5,  0.5,  0, 0,  1, 0, 0, 1}, -- 5
-  {-0.5,  0.5,  0.5,  0, 1,  1, 0, 0, 1}, -- 4
-  { 0.5,  0.5,  0.5,  1, 1,  1, 0, 0, 1}, -- 3
+  -- 4 3 7 8
+  {vp[7][1], vp[7][2], vp[7][3],  0, 0, 1,  0, 1,  1, 1, 1, 1}, -- red
+  {vp[3][1], vp[3][2], vp[3][3],  0, 0, 1,  1, 1,  1, 1, 1, 1}, -- 1
+  {vp[4][1], vp[4][2], vp[4][3],  0, 0, 1,  1, 0,  1, 1, 1, 1}, -- 2
+  {vp[8][1], vp[8][2], vp[8][3],  0, 0, 1,  0, 0,  1, 1, 1, 1}, -- 3
+  {vp[7][1], vp[7][2], vp[7][3],  0, 0, 1,  0, 1,  1, 1, 1, 1}, -- 4
+  {vp[4][1], vp[4][2], vp[4][3],  0, 0, 1,  1, 0,  1, 1, 1, 1}, -- 5
 
-  {-0.5, -0.5, -0.5,  0, 1,  0, 1, 0, 1},
-  {-0.5,  0.5, -0.5,  1, 1,  0, 1, 0, 1},
-  {-0.5,  0.5,  0.5,  1, 0,  0, 1, 0, 1}, -- green
-  {-0.5,  0.5,  0.5,  1, 0,  0, 1, 0, 1},
-  {-0.5, -0.5,  0.5,  0, 0,  0, 1, 0, 1},
-  {-0.5, -0.5, -0.5,  0, 1,  0, 1, 0, 1},
+  -- 8 7 5 6
+  {vp[5][1], vp[5][2], vp[5][3],  -1, 0, 0,  0, 1,  1, 1, 1, 1}, -- green
+  {vp[7][1], vp[7][2], vp[7][3],  -1, 0, 0,  1, 1,  1, 1, 1, 1},
+  {vp[8][1], vp[8][2], vp[8][3],  -1, 0, 0,  1, 0,  1, 1, 1, 1},
+  {vp[6][1], vp[6][2], vp[6][3],  -1, 0, 0,  0, 0,  1, 1, 1, 1},
+  {vp[5][1], vp[5][2], vp[5][3],  -1, 0, 0,  0, 1,  1, 1, 1, 1},
+  {vp[8][1], vp[8][2], vp[8][3],  -1, 0, 0,  1, 0,  1, 1, 1, 1},
 
-  { 0.5,  0.5,  0.5,  1, 0,  0, 0, 1, 1}, -- blue OK
-  { 0.5,  0.5, -0.5,  1, 1,  0, 0, 1, 1},
-  { 0.5, -0.5, -0.5,  0, 1,  0, 0, 1, 1},
-  { 0.5, -0.5, -0.5,  0, 1,  0, 0, 1, 1},
-  { 0.5, -0.5,  0.5,  0, 0,  0, 0, 1, 1},
-  { 0.5,  0.5,  0.5,  1, 0,  0, 0, 1, 1},
+  -- 6 2 4 8
+  {vp[4][1], vp[4][2], vp[4][3],  0, -1, 0,  0, 1,  1, 1, 1, 1},
+  {vp[2][1], vp[2][2], vp[2][3],  0, -1, 0,  1, 1,  1, 1, 1, 1},
+  {vp[6][1], vp[6][2], vp[6][3],  0, -1, 0,  1, 0,  1, 1, 1, 1}, -- blue OK
+  {vp[8][1], vp[8][2], vp[8][3],  0, -1, 0,  0, 0,  1, 1, 1, 1},
+  {vp[4][1], vp[4][2], vp[4][3],  0, -1, 0,  0, 1,  1, 1, 1, 1},
+  {vp[6][1], vp[6][2], vp[6][3],  0, -1, 0,  1, 0,  1, 1, 1, 1},
 
-  { 0.5, -0.5,  0.5,  1, 0,  1, 1, 1, 1},
-  { 0.5, -0.5, -0.5,  1, 1,  1, 1, 1, 1},
-  {-0.5, -0.5, -0.5,  0, 1,  1, 1, 1, 1}, -- yellow
-  {-0.5, -0.5, -0.5,  0, 1,  1, 1, 1, 1},
-  {-0.5, -0.5,  0.5,  0, 0,  1, 1, 1, 1},
-  { 0.5, -0.5,  0.5,  1, 0,  1, 1, 1, 1},
+  -- 2 1 3 4
+  {vp[3][1], vp[3][2], vp[3][3],  1, 0, 0,  0, 1,  1, 1, 1, 1}, -- white
+  {vp[1][1], vp[1][2], vp[1][3],  1, 0, 0,  1, 1,  1, 1, 1, 1},
+  {vp[2][1], vp[2][2], vp[2][3],  1, 0, 0,  1, 0,  1, 1, 1, 1},
+  {vp[4][1], vp[4][2], vp[4][3],  1, 0, 0,  0, 0,  1, 1, 1, 1},
+  {vp[3][1], vp[3][2], vp[3][3],  1, 0, 0,  0, 1,  1, 1, 1, 1},
+  {vp[2][1], vp[2][2], vp[2][3],  1, 0, 0,  1, 0,  1, 1, 1, 1},
 
-  {-0.5,  0.5, -0.5,  0, 1,  1, 1, 0, 1}, -- white OK
-  { 0.5,  0.5, -0.5,  1, 1,  1, 1, 0, 1},
-  { 0.5,  0.5,  0.5,  1, 0,  1, 1, 0, 1},
-  { 0.5,  0.5,  0.5,  1, 0,  1, 1, 0, 1},
-  {-0.5,  0.5,  0.5,  0, 0,  1, 1, 0, 1},
-  {-0.5,  0.5, -0.5,  0, 1,  1, 1, 0, 1}
+  -- 6 5 1 2
+  {vp[1][1], vp[1][2], vp[1][3],  0, 0, -1,  0, 1,  1, 1, 1, 1},
+  {vp[5][1], vp[5][2], vp[5][3],  0, 0, -1,  1, 1,  1, 1, 1, 1},
+  {vp[6][1], vp[6][2], vp[6][3],  0, 0, -1,  1, 0,  1, 1, 1, 1}, -- yellow OK
+  {vp[2][1], vp[2][2], vp[2][3],  0, 0, -1,  0, 0,  1, 1, 1, 1},
+  {vp[1][1], vp[1][2], vp[1][3],  0, 0, -1,  0, 1,  1, 1, 1, 1},
+  {vp[6][1], vp[6][2], vp[6][3],  0, 0, -1,  1, 0,  1, 1, 1, 1},
 })
 cube:Finalize(true)
 
-local LerpedNumber_mt = {}
-
-function LerpedNumber_mt:__index(k)
-  if k ~= "val" then
-    error("cannot get any value other than 'val' on a lerped number")
-  end
-
-  return core.Interpolate(rawget(self, "prev"), rawget(self, "val"))
-end
-
-function LerpedNumber_mt:__newindex(k, v)
-  if k ~= "val" then
-    error("cannot set any value other than 'val' on a lerped number")
-  end
-
-  rawset(self, "prev", rawget(self, "val"))
-  rawset(self, "val", v)
-end
-
-local function LerpedNumber(init)
-  local n = setmetatable({}, LerpedNumber_mt)
-  n.val = init or 0
-  return n
-end
-
 local r = 0
-local rx = LerpedNumber()
-local ry = LerpedNumber()
+local rx = gcore.CreateLerpedNumber()
+local ry = gcore.CreateLerpedNumber()
 
 function step()
   if core.IsKeyDown(core.key.ESCAPE) then
@@ -94,8 +93,8 @@ function step()
   end
 
   r = r + (1/30)
-  rx.val = r * 0.25
-  ry.val = r
+  rx:set(r * 0.25)
+  ry:set(r)
 end
 
 function draw()
@@ -105,8 +104,8 @@ function draw()
     x = 0,
     y = 0,
     z = -3,
-    rx = rx.val,
-    ry = ry.val,
+    rx = 0,-- rx = rx:get(),--math.rad(-24),
+    ry = ry:get(),--math.rad(45),
     rz = 0,
     sx = 1,
     sz = 1,
@@ -121,7 +120,7 @@ function draw()
   local a = sw / sh
 
   local p = core.Mat4Identity()
-  p:Perspective(45, a, 0.01, 100)
+  p:Perspective(45, a, 1, 100)
 
   shader:SendMat4("m", m)
   shader:SendMat4("v", v)

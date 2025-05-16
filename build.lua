@@ -25,7 +25,7 @@ else
   os.exit(1)
 end
 
-AddTarget("bs", "exe", {
+AddTarget("chime", "exe", {
   src = {
     "main.c",
     "core/include.c",

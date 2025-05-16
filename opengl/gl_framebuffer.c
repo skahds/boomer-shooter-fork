@@ -12,6 +12,7 @@ struct Shader* framebuffer_draw_shader = NULL;
 static void GenerateTexture(
   struct Framebuffer* fb,
   uint32_t* handle, 
+  GLenum attachment,
   GLenum internal,
   GLenum format,
   GLenum type)
@@ -34,9 +35,9 @@ static void GenerateTexture(
 
   glFramebufferTexture2D(
     GL_FRAMEBUFFER,
-    GL_COLOR_ATTACHMENT0,
+    attachment,
     GL_TEXTURE_2D,
-    fb->color_handle,
+    *handle,
     0
   );
 
@@ -46,7 +47,14 @@ static void GenerateTexture(
 static void GenerateTextures(struct Framebuffer* fb)
 {
   if (fb->flags & FRAMEBUFFER_COLOR_BUF) {
-    GenerateTexture(fb, &fb->color_handle, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+    GenerateTexture(
+      fb,
+      &fb->color_handle,
+      GL_COLOR_ATTACHMENT0,
+      GL_RGB,
+      GL_RGB,
+      GL_UNSIGNED_BYTE
+    );
   }
 
   // TODO: maybe make depth/stencil use renderbuffers? they're faster when not 
@@ -55,6 +63,7 @@ static void GenerateTextures(struct Framebuffer* fb)
     GenerateTexture(
       fb,
       &fb->z_mask_handle,
+      GL_DEPTH_STENCIL_ATTACHMENT,
       GL_DEPTH24_STENCIL8,
       GL_DEPTH_STENCIL,
       GL_UNSIGNED_INT_24_8
@@ -63,6 +72,7 @@ static void GenerateTextures(struct Framebuffer* fb)
     GenerateTexture(
       fb,
       &fb->z_mask_handle,
+      GL_DEPTH_ATTACHMENT,
       GL_DEPTH_COMPONENT32F,
       GL_DEPTH_COMPONENT,
       GL_FLOAT
@@ -147,7 +157,10 @@ void FramebufferResize(struct Framebuffer* fb, vec2i_t size)
   GenerateTextures(fb);
 
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-    LogWarning("framebuffer %d resizing could not be completed", fb->fb_handle);
+    LogWarning(
+      "framebuffer %d resizing could not be completed",
+      fb->fb_handle
+    );
   }
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

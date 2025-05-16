@@ -8,7 +8,7 @@ int main()
   LogInfo("os: %s", bse_os_str);
 
   struct Engine engine;
-  EngineInit(&engine, "Boomer Shooter");
+  EngineInit(&engine, "Chime");
 
   // TODO: move this into core/engine.c
   lua_State* L = luaL_newstate();

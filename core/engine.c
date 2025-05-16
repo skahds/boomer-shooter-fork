@@ -43,6 +43,8 @@ void EngineInit(struct Engine* engine, const char* window_title)
   }
   LogInfo("created glfw window");
 
+  glfwMakeContextCurrent(engine->window_handle);
+
   InitBackend(engine);
 
   glfwSetWindowUserPointer(engine->window_handle, engine);
