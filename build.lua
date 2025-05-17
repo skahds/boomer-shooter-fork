@@ -95,15 +95,27 @@ AddTarget("chime", "exe", {
     "lib/luajit/src",
     "lib/glfw/include",
     "lib/glad/include",
+    "lib/miniz/include",
+    "lib/stb/include",
   },
   define = defines,
   ldflags = ldflags,
-  libs = {"glfw", "glad", "luajit", "m"},
+  libs = {"glfw", "glad", "stb", "miniz", "luajit", "m"},
 })
 
 AddTarget("glad", "staticlib", {
   src = {"lib/glad/src/glad.c"},
   include = {"lib/glad/include"},
+})
+
+AddTarget("stb", "staticlib", {
+  src = {"lib/stb/stb.c"},
+  include = {"lib/stb/include"},
+})
+
+AddTarget("miniz", "staticlib", {
+  src = {"lib/miniz/miniz.c"},
+  include = {"lib/miniz/include"},
 })
 
 AddTarget("glfw", "command", {
