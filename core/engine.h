@@ -7,13 +7,13 @@
 #include "key.h"
 #include "math/vec2i.h"
 #include "math/vec2f.h"
-#include "gfx/framebuffer.h"
 #include "timer.h"
 
 struct Engine
 {
   struct GLFWwindow* window_handle;
   lua_State* L;
+  struct Renderer* renderer;
   int lua_error_handler_index;
 
   vec2i_t target_screen_size;

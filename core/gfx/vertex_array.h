@@ -3,6 +3,7 @@
 
 #include "include.h"
 #include "gfx_types.h"
+#include "gfx.h"
 #include "buffer_object.h"
 
 struct VertexAttrib
@@ -30,16 +31,21 @@ void VertexFormatUpdate(
   size_t count
 );
 
-struct VertexArray* VertexArrayCreate(const struct VertexFormat* fmt);
-void VertexArrayDestroy(struct VertexArray* varr);
-void VertexArrayBind(struct VertexArray* varr);
+struct VertexArray* VertexArrayCreate(
+  struct Renderer* r,
+  const struct VertexFormat* fmt
+);
+void VertexArrayDestroy(struct Renderer* r, struct VertexArray* varr);
+void VertexArrayBind(struct Renderer* r, struct VertexArray* varr);
 void VertexArrayDraw(
+  struct Renderer* r,
   struct VertexArray* varr,
   size_t start,
   size_t count,
   enum IndexMode index_mode
 );
 void VertexArrayDrawIndexed(
+  struct Renderer* r,
   struct VertexArray* varr,
   struct BufferObject* ebo,
   size_t count,

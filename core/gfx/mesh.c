@@ -14,7 +14,7 @@ struct Mesh MeshCreate(struct VertexFormat* fmt)
   return m;
 }
 
-void MeshDestroy(struct Mesh* m)
+void MeshDestroy(struct Renderer* r, struct Mesh* m)
 {
   m->vertices = NULL;
   m->vertex_count = 0;
@@ -23,37 +23,43 @@ void MeshDestroy(struct Mesh* m)
   m->fmt = NULL;
 
   if (m->vao != NULL) {
-    VertexArrayDestroy(m->vao);
+    VertexArrayDestroy(r, m->vao);
   }
   if (m->vbo != NULL) {
-    BufferObjectDestroy(m->vbo);
+    BufferObjectDestroy(r, m->vbo);
     m->vbo = NULL;
   }
   if (m->ebo != NULL) {
-    BufferObjectDestroy(m->ebo);
+    BufferObjectDestroy(r, m->ebo);
     m->ebo = NULL;
   }
 }
 
-void MeshFinalize(struct Mesh* m, bool is_static)
+void MeshFinalize(struct Renderer* r, struct Mesh* m, bool is_static)
 {
   enum DrawMode mode = is_static ? DRAW_STATIC : DRAW_DYNAMIC;
 
-  struct BufferObject* vbo = BufferObjectCreate(BUFFER_ARRAY);
-  BufferObjectSet(vbo, m->vertices, m->fmt->stride * m->vertex_count, mode);
-  BufferObjectBind(vbo);
-  struct VertexArray* vao = VertexArrayCreate(m->fmt);
+  struct BufferObject* vbo = BufferObjectCreate(r, BUFFER_ARRAY);
+  BufferObjectSet(r, vbo, m->vertices, m->fmt->stride * m->vertex_count, mode);
+  BufferObjectBind(r, vbo);
+  struct VertexArray* vao = VertexArrayCreate(r, m->fmt);
   m->vao = vao;
   m->vbo = vbo;
 
   if (m->index_count != 0) {
-    struct BufferObject* ebo = BufferObjectCreate(BUFFER_INDEX);
-    BufferObjectSet(ebo, m->indices, sizeof(uint16_t) * m->index_count, mode);
+    struct BufferObject* ebo = BufferObjectCreate(r, BUFFER_INDEX);
+    BufferObjectSet(
+      r,
+      ebo,
+      m->indices,
+      sizeof(uint16_t) * m->index_count,
+      mode
+    );
     m->ebo = ebo;
   }
 }
 
-void MeshDraw(struct Mesh* m)
+void MeshDraw(struct Renderer* r, struct Mesh* m)
 {
   if (m->vao == NULL || m->vbo == NULL) {
     LogError("attempt to draw unfinalized mesh");
@@ -62,6 +68,7 @@ void MeshDraw(struct Mesh* m)
 
   if (m->ebo != NULL) {
     VertexArrayDrawIndexed(
+      r,
       m->vao,
       m->ebo,
       m->index_count,
@@ -69,6 +76,6 @@ void MeshDraw(struct Mesh* m)
       INDEX_TRIANGLES
     );
   } else {
-    VertexArrayDraw(m->vao, 0, m->vertex_count, INDEX_TRIANGLES);
+    VertexArrayDraw(r, m->vao, 0, m->vertex_count, INDEX_TRIANGLES);
   }
 }

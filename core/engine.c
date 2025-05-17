@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "gfx/gfx.h"
+#include "gfx/framebuffer.h"
 #include "math.h"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
@@ -25,7 +26,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
   vec2i_t screen_size = (vec2i_t){ceil(screen_width), ceil(screen_height)};
 
   engine->screen_size = screen_size;
-  FramebufferResize(engine->screen, screen_size);
+  FramebufferResize(engine->renderer, engine->screen, screen_size);
 }
 
 void EngineInit(struct Engine* engine, const char* window_title)
@@ -45,7 +46,7 @@ void EngineInit(struct Engine* engine, const char* window_title)
 
   glfwMakeContextCurrent(engine->window_handle);
 
-  InitBackend(engine);
+  InitBackend(engine, GFX_BACKEND_OPENGL);
 
   glfwSetWindowUserPointer(engine->window_handle, engine);
 
@@ -65,6 +66,7 @@ void EngineInit(struct Engine* engine, const char* window_title)
   };
 
   engine->screen = FramebufferCreate(
+    engine->renderer,
     engine->screen_size,
     FRAMEBUFFER_COLOR_BUF | FRAMEBUFFER_DEPTH_BUF | FRAMEBUFFER_DRAWABLE
   );
@@ -74,7 +76,7 @@ void EngineDestroy(struct Engine* engine)
 {
   LogInfo("destroying engine...");
 
-  FramebufferDestroy(engine->screen);
+  FramebufferDestroy(engine->renderer, engine->screen);
 
   glfwDestroyWindow(engine->window_handle);
   // for some reason this causes a false positive(?) memory leak with asan.
@@ -116,12 +118,15 @@ void EngineUpdate(struct Engine* engine)
 void EngineDraw(struct Engine* engine)
 {
   // Draw to screen
-  FramebufferBind(engine->screen);
-  SetDepthTest(true);
+  FramebufferBind(engine->renderer, engine->screen);
+  SetDepthTest(engine->renderer, true);
 
-  AdjustViewport((vec2f_t){engine->screen_size.x, engine->screen_size.y});
+  AdjustViewport(
+    engine->renderer,
+    (vec2f_t){engine->screen_size.x, engine->screen_size.y}
+  );
 
-  ClearBackground(0.2, 0.2, 0.2);
+  ClearBackground(engine->renderer, 0.2, 0.2, 0.2);
 
   if (engine->L != NULL) {
     lua_getglobal(engine->L, "draw");
@@ -136,14 +141,19 @@ void EngineDraw(struct Engine* engine)
   EngineSwapBuffers(engine);
 
   // Draw screen
-  FramebufferBind(NULL);
+  FramebufferBind(engine->renderer, NULL);
   vec2i_t wsize = EngineGetWindowSize(engine);
-  AdjustViewport((vec2f_t){wsize.x, wsize.y});
+  AdjustViewport(engine->renderer, (vec2f_t){wsize.x, wsize.y});
 
-  ClearBackground(0, 0, 0);
-  SetDepthTest(false);
+  ClearBackground(engine->renderer, 0, 0, 0);
+  SetDepthTest(engine->renderer, false);
 
-  FramebufferDraw(engine->screen, (vec2i_t){-1, 1}, (vec2i_t){2, -2});
+  FramebufferDraw(
+    engine->renderer,
+    engine->screen,
+    (vec2i_t){-1, 1},
+    (vec2i_t){2, -2}
+  );
 
   TimerDoneRendering(&engine->timer);
 }

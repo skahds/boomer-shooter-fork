@@ -5,9 +5,10 @@
 
 static int L_LoadTexture(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   const char* path = luaL_checkstring(L, 1);
   struct Texture* tex = Create(struct Texture);
-  *tex = TextureLoad(path);
+  *tex = TextureLoad(r, path);
   CreateLuaData(L, tex, TEXTURE_MT_NAME, LUA_TYPE_TEXTURE);
   return 1;
 }
@@ -27,33 +28,37 @@ static int L_TextureMt_GetSize(lua_State* L)
 
 static int L_TextureMt_GenerateMipmaps(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
-  TextureGenerateMipmaps(tex);
+  TextureGenerateMipmaps(r, tex);
   return 0;
 }
 
 static int L_TextureMt_SetFilter(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
   enum TextureFilter min = luaL_checkinteger(L, 2);
   enum TextureFilter mag = luaL_checkinteger(L, 3);
-  TextureSetFilter(tex, min, mag);
+  TextureSetFilter(r, tex, min, mag);
   return 0;
 }
 
 static int L_TextureMt_SetWrap(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
   enum TextureWrap x = luaL_checkinteger(L, 2);
   enum TextureWrap y = luaL_checkinteger(L, 3);
-  TextureSetWrap(tex, x, y);
+  TextureSetWrap(r, tex, x, y);
   return 0;
 }
 
 static int L_TextureMt_Bind(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
-  TextureBind(tex, luaL_checkinteger(L, 2));
+  TextureBind(r, tex, luaL_checkinteger(L, 2));
   return 2;
 }
 
@@ -66,8 +71,9 @@ static int L_TextureMt__index(lua_State* L)
 
 static int L_TextureMt__gc(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Texture* tex = (struct Texture*)ReadLuaData(L, 1, LUA_TYPE_TEXTURE);
-  TextureDestroy(tex);
+  TextureDestroy(r, tex);
   Destroy(tex);
   return 0;
 }

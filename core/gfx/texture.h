@@ -3,6 +3,7 @@
 
 #include "include.h"
 #include "gfx_types.h"
+#include "gfx.h"
 #include "image.h"
 #include "math/vec2i.h"
 
@@ -18,20 +19,22 @@ struct Texture
   enum TextureWrap y_wrap;
 };
 
-struct Texture TextureLoad(const char* path);
-struct Texture TextureLoadFromImg(struct Image* img);
-void TextureGenerateMipmaps(struct Texture* tex);
-void TextureBind(struct Texture* tex, uint8_t slot);
+struct Texture TextureLoad(struct Renderer* r, const char* path);
+struct Texture TextureLoadFromImg(struct Renderer* r, struct Image* img);
+void TextureDestroy(struct Renderer* r, struct Texture* tex);
+void TextureGenerateMipmaps(struct Renderer* r, struct Texture* tex);
+void TextureBind(struct Renderer* r, struct Texture* tex, uint8_t slot);
 void TextureSetFilter(
+  struct Renderer* r,
   struct Texture* tex,
   enum TextureFilter min,
   enum TextureFilter mag
 );
 void TextureSetWrap(
+  struct Renderer* r,
   struct Texture* tex,
   enum TextureWrap x_wrap,
   enum TextureWrap y_wrap
 );
-void TextureDestroy(struct Texture* tex);
 
 #endif

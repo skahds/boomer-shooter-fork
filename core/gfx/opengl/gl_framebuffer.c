@@ -5,6 +5,8 @@
 #include "gfx/gfx_types.h"
 #include "gfx/vertex_array.h"
 #include "gl_shader.h"
+#include "gl_vertex_array.h"
+#include "gl_buffer_object.h"
 #include "mem.h"
 
 struct Shader* framebuffer_draw_shader = NULL;
@@ -80,7 +82,7 @@ static void GenerateTextures(struct Framebuffer* fb)
   }
 }
 
-struct Framebuffer* FramebufferCreate(vec2i_t size, uint8_t flags)
+struct Framebuffer* gl_FramebufferCreate(vec2i_t size, uint8_t flags)
 {
   struct Framebuffer* fb = Create(struct Framebuffer);
 
@@ -103,13 +105,13 @@ struct Framebuffer* FramebufferCreate(vec2i_t size, uint8_t flags)
       {TYPE_FLOAT, 2}, // UV
     };
     struct VertexFormat format = VertexFormatCreate(attribs, 2);
-    fb->vbo = BufferObjectCreate(BUFFER_ARRAY);
-    BufferObjectSet(fb->vbo, NULL, 0, DRAW_DYNAMIC);
-    BufferObjectBind(fb->vbo);
-    fb->vao = VertexArrayCreate(&format);
+    fb->vbo = gl_BufferObjectCreate(BUFFER_ARRAY);
+    gl_BufferObjectSet(fb->vbo, NULL, 0, DRAW_DYNAMIC);
+    gl_BufferObjectBind(fb->vbo);
+    fb->vao = gl_VertexArrayCreate(&format);
 
     if (framebuffer_draw_shader == NULL) {
-      framebuffer_draw_shader = ShaderLoadFromFiles(
+      framebuffer_draw_shader = gl_ShaderLoadFromFiles(
         "res/vfbdraw.glsl",
         "res/ffbdraw.glsl"
       );
@@ -129,24 +131,24 @@ struct Framebuffer* FramebufferCreate(vec2i_t size, uint8_t flags)
   return fb;
 }
 
-void FramebufferDestroy(struct Framebuffer* fb)
+void gl_FramebufferDestroy(struct Framebuffer* fb)
 {
   if (fb->color_handle != 0) glDeleteTextures(1, &fb->color_handle);
   if (fb->z_mask_handle != 0) glDeleteTextures(1, &fb->z_mask_handle);
-  if (fb->vao != NULL) VertexArrayDestroy(fb->vao);
-  if (fb->vbo != NULL) BufferObjectDestroy(fb->vbo);
+  if (fb->vao != NULL) gl_VertexArrayDestroy(fb->vao);
+  if (fb->vbo != NULL) gl_BufferObjectDestroy(fb->vbo);
   glDeleteFramebuffers(1, &fb->fb_handle);
   Destroy(fb);
 }
 
-void FramebufferBind(struct Framebuffer* fb)
+void gl_FramebufferBind(struct Framebuffer* fb)
 {
   uint32_t handle = 0;
   if (fb != NULL) handle = fb->fb_handle;
   glBindFramebuffer(GL_FRAMEBUFFER, handle);
 }
 
-void FramebufferResize(struct Framebuffer* fb, vec2i_t size)
+void gl_FramebufferResize(struct Framebuffer* fb, vec2i_t size)
 {
   if (fb->color_handle != 0) glDeleteTextures(1, &fb->color_handle);
   if (fb->z_mask_handle != 0) glDeleteTextures(1, &fb->z_mask_handle);
@@ -165,7 +167,7 @@ void FramebufferResize(struct Framebuffer* fb, vec2i_t size)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FramebufferDraw(struct Framebuffer* fb, vec2i_t start, vec2i_t end)
+void gl_FramebufferDraw(struct Framebuffer* fb, vec2i_t start, vec2i_t end)
 {
   if (fb->vbo == NULL || fb->vao == NULL) {
     LogWarning(
@@ -185,13 +187,13 @@ void FramebufferDraw(struct Framebuffer* fb, vec2i_t start, vec2i_t end)
     start.x, start.y + end.y, 0, 1, // bl
   };
 
-  VertexArrayBind(fb->vao);
-  BufferObjectSet(fb->vbo, vertices, sizeof(vertices), DRAW_DYNAMIC);
+  gl_VertexArrayBind(fb->vao);
+  gl_BufferObjectSet(fb->vbo, vertices, sizeof(vertices), DRAW_DYNAMIC);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, fb->color_handle);
 
-  ShaderBind(framebuffer_draw_shader);
-  ShaderSendInt(framebuffer_draw_shader, "tex0", 0);
-  VertexArrayDraw(fb->vao, 0, 6, INDEX_TRIANGLES);
+  gl_ShaderBind(framebuffer_draw_shader);
+  gl_ShaderSendInt(framebuffer_draw_shader, "tex0", 0);
+  gl_VertexArrayDraw(fb->vao, 0, 6, INDEX_TRIANGLES);
 }

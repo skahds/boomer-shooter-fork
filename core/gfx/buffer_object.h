@@ -3,18 +3,23 @@
 
 #include "include.h"
 #include "gfx_types.h"
+#include "gfx.h"
 
 struct BufferObject;
 
-struct BufferObject* BufferObjectCreate(enum BufferObjectType type);
-void BufferObjectBind(struct BufferObject* buf);
-void BufferObjectUnbind(enum BufferObjectType type);
+struct BufferObject* BufferObjectCreate(
+  struct Renderer* r,
+  enum BufferObjectType type
+);
+void BufferObjectDestroy(struct Renderer* r, struct BufferObject* buf);
+void BufferObjectBind(struct Renderer* r, struct BufferObject* buf);
+void BufferObjectUnbind(struct Renderer* r, enum BufferObjectType type);
 void BufferObjectSet(
+  struct Renderer* r,
   struct BufferObject* buf,
   void* data,
   size_t size,
   enum DrawMode mode
 );
-void BufferObjectDestroy(struct BufferObject* buf);
 
 #endif

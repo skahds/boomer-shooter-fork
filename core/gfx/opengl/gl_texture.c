@@ -4,8 +4,9 @@
 
 #include "gl_type_conv.h"
 #include "mem.h"
+#include "gl_texture.h"
 
-struct Texture TextureLoadFromImg(struct Image* img)
+struct Texture gl_TextureLoadFromImg(struct Image* img)
 {
   struct Texture tex;
 
@@ -30,13 +31,21 @@ struct Texture TextureLoadFromImg(struct Image* img)
 
   tex.handle = handle_ptr;
 
-  TextureSetFilter(&tex, TEXTURE_FILTER_NEAREST, TEXTURE_FILTER_NEAREST);
-  TextureSetWrap(&tex, TEXTURE_WRAP_REPEAT, TEXTURE_WRAP_REPEAT);
+  gl_TextureSetFilter(&tex, TEXTURE_FILTER_NEAREST, TEXTURE_FILTER_NEAREST);
+  gl_TextureSetWrap(&tex, TEXTURE_WRAP_REPEAT, TEXTURE_WRAP_REPEAT);
 
   return tex;
 }
 
-void TextureBind(struct Texture* tex, uint8_t slot)
+void gl_TextureDestroy(struct Texture* tex)
+{
+  uint32_t handle = *((uint32_t*)tex->handle);
+  glDeleteTextures(1, &handle);
+  LogDebug("destroyed texture %d", handle);
+  Destroy(tex->handle);
+}
+
+void gl_TextureBind(struct Texture* tex, uint8_t slot)
 {
   uint32_t handle = 0;
   if (tex != NULL) handle = *((uint32_t*)tex->handle);
@@ -44,7 +53,7 @@ void TextureBind(struct Texture* tex, uint8_t slot)
   glBindTexture(GL_TEXTURE_2D, handle);
 }
 
-void TextureGenerateMipmaps(struct Texture* tex)
+void gl_TextureGenerateMipmaps(struct Texture* tex)
 {
   switch (tex->min_filter) {
     case TEXTURE_FILTER_NEAREST:
@@ -64,11 +73,11 @@ void TextureGenerateMipmaps(struct Texture* tex)
       *((uint32_t*)tex->handle));
   }
 
-  TextureBind(tex, 0);
+  gl_TextureBind(tex, 0);
   glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void TextureSetFilter(
+void gl_TextureSetFilter(
   struct Texture* tex,
   enum TextureFilter min,
   enum TextureFilter mag)
@@ -86,7 +95,7 @@ void TextureSetFilter(
       *((uint32_t*)tex->handle));
   }
   
-  TextureBind(tex, 0);
+  gl_TextureBind(tex, 0);
   glTexParameteri(
     GL_TEXTURE_2D,
     GL_TEXTURE_MIN_FILTER,
@@ -99,7 +108,7 @@ void TextureSetFilter(
   );
 }
 
-void TextureSetWrap(
+void gl_TextureSetWrap(
   struct Texture* tex,
   enum TextureWrap x_wrap,
   enum TextureWrap y_wrap)
@@ -107,7 +116,7 @@ void TextureSetWrap(
   tex->x_wrap = x_wrap;
   tex->y_wrap = y_wrap;
   
-  TextureBind(tex, 0);
+  gl_TextureBind(tex, 0);
   glTexParameteri(
     GL_TEXTURE_2D,
     GL_TEXTURE_WRAP_S,
@@ -118,12 +127,4 @@ void TextureSetWrap(
     GL_TEXTURE_WRAP_T,
     TextureWrapToOpenGl(y_wrap)
   );
-}
-
-void TextureDestroy(struct Texture* tex)
-{
-  uint32_t handle = *((uint32_t*)tex->handle);
-  glDeleteTextures(1, &handle);
-  LogDebug("destroyed texture %d", handle);
-  Destroy(tex->handle);
 }

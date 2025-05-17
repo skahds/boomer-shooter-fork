@@ -6,7 +6,7 @@
 #include "gl_type_conv.h"
 #include "gl_buffer_object.h"
 
-struct VertexArray* VertexArrayCreate(const struct VertexFormat* fmt)
+struct VertexArray* gl_VertexArrayCreate(const struct VertexFormat* fmt)
 {
   struct VertexArray* varr = Create(struct VertexArray);
 
@@ -37,21 +37,21 @@ struct VertexArray* VertexArrayCreate(const struct VertexFormat* fmt)
   return varr;
 }
 
-void VertexArrayBind(struct VertexArray* varr)
+void gl_VertexArrayBind(struct VertexArray* varr)
 {
   uint32_t handle = 0;
   if (varr != NULL) handle = varr->handle;
   glBindVertexArray(handle);
 }
 
-void VertexArrayDestroy(struct VertexArray* varr)
+void gl_VertexArrayDestroy(struct VertexArray* varr)
 {
   glDeleteVertexArrays(1, &varr->handle);
   LogDebug("destroyed vertex array %d", varr->handle);
   Destroy(varr);
 }
 
-void VertexArrayDraw(
+void gl_VertexArrayDraw(
   struct VertexArray* varr,
   size_t start,
   size_t count,
@@ -62,7 +62,7 @@ void VertexArrayDraw(
   glBindVertexArray(0);
 }
 
-void VertexArrayDrawIndexed(
+void gl_VertexArrayDrawIndexed(
   struct VertexArray* varr,
   struct BufferObject* ebo,
   size_t count,

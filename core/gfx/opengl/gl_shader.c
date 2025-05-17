@@ -108,7 +108,7 @@ static uint32_t CompileSource(const char* name, const char* src, uint32_t type)
   return h;
 }
 
-struct Shader* ShaderLoadFromFiles(const char* vert, const char* frag)
+struct Shader* gl_ShaderLoadFromFiles(const char* vert, const char* frag)
 {
   char* vsrc = ReadFile(vert);
   char* fsrc = ReadFile(frag);
@@ -120,7 +120,7 @@ struct Shader* ShaderLoadFromFiles(const char* vert, const char* frag)
   return ShaderCreate(vertex_handle, fragment_handle);
 }
 
-struct Shader* ShaderLoadFromSource(const char* vert, const char* frag)
+struct Shader* gl_ShaderLoadFromSource(const char* vert, const char* frag)
 {
   uint32_t vertex_handle = CompileSource(
     "embedded vertex",
@@ -151,68 +151,68 @@ static struct ShaderVar* GetUniform(struct Shader* s, const char* name)
   return var;
 }
 
-void ShaderSendInt(struct Shader* s, const char* name, int i)
+void gl_ShaderSendInt(struct Shader* s, const char* name, int i)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform1i(ptr->loc, i);
 }
 
-void ShaderSendFloat(struct Shader* s, const char* name, float f)
+void gl_ShaderSendFloat(struct Shader* s, const char* name, float f)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform1f(ptr->loc, f);
 }
 
-void ShaderSendVec2f(struct Shader* s, const char* name, vec2f_t v)
+void gl_ShaderSendVec2f(struct Shader* s, const char* name, vec2f_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform2f(ptr->loc, v.x, v.y);
 }
 
-void ShaderSendVec2i(struct Shader* s, const char* name, vec2i_t v)
+void gl_ShaderSendVec2i(struct Shader* s, const char* name, vec2i_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform2i(ptr->loc, v.x, v.y);
 }
 
-void ShaderSendVec3f(struct Shader* s, const char* name, vec3f_t v)
+void gl_ShaderSendVec3f(struct Shader* s, const char* name, vec3f_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform3i(ptr->loc, v.x, v.y, v.z);
 }
 
-void ShaderSendVec3i(struct Shader* s, const char* name, vec3i_t v)
+void gl_ShaderSendVec3i(struct Shader* s, const char* name, vec3i_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform3i(ptr->loc, v.x, v.y, v.z);
 }
 
-void ShaderSendVec4f(struct Shader* s, const char* name, vec4f_t v)
+void gl_ShaderSendVec4f(struct Shader* s, const char* name, vec4f_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform4i(ptr->loc, v.x, v.y, v.z, v.w);
 }
 
-void ShaderSendVec4i(struct Shader* s, const char* name, vec4i_t v)
+void gl_ShaderSendVec4i(struct Shader* s, const char* name, vec4i_t v)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniform4i(ptr->loc, v.x, v.y, v.z, v.w);
 }
 
-void ShaderSendMat4(struct Shader* s, const char* name, mat4_t m)
+void gl_ShaderSendMat4(struct Shader* s, const char* name, mat4_t m)
 {
   struct ShaderVar* ptr = GetUniform(s, name);
   glUniformMatrix4fv(ptr->loc, 1, GL_FALSE, m);
 }
 
-void ShaderBind(struct Shader* s)
+void gl_ShaderBind(struct Shader* s)
 {
   uint32_t handle = 0;
   if (s != NULL) handle = s->handle;
   glUseProgram(handle);
 }
 
-void ShaderDestroy(struct Shader* s)
+void gl_ShaderDestroy(struct Shader* s)
 {
   glDeleteProgram(s->handle);
   LogDebug("destroyed shader %d", s->handle);

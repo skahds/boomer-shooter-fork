@@ -89,15 +89,17 @@ static int L_MeshMt_SetVertices(lua_State* L)
 
 static int L_MeshMt_Finalize(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Mesh* mesh = (struct Mesh*)ReadLuaData(L, 1, LUA_TYPE_MESH);
-  MeshFinalize(mesh, lua_toboolean(L, 2));
+  MeshFinalize(r, mesh, lua_toboolean(L, 2));
   return 0;
 }
 
 static int L_MeshMt_Draw(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Mesh* mesh = (struct Mesh*)ReadLuaData(L, 1, LUA_TYPE_MESH);
-  MeshDraw(mesh);
+  MeshDraw(r, mesh);
   return 0;
 }
 
@@ -110,6 +112,7 @@ static int L_MeshMt__index(lua_State* L)
 
 static int L_MeshMt__gc(lua_State* L)
 {
+  struct Renderer* r = GetEngine(L)->renderer;
   struct Mesh* mesh = (struct Mesh*)ReadLuaData(L, 1, LUA_TYPE_MESH);
   if (mesh->vertex_count != 0) {
     Destroy(mesh->vertices);
@@ -119,7 +122,7 @@ static int L_MeshMt__gc(lua_State* L)
     Destroy(mesh->indices);
     mesh->index_count = 0;
   }
-  MeshDestroy(mesh);
+  MeshDestroy(r, mesh);
   Destroy(mesh);
   return 0;
 }

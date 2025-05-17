@@ -20,8 +20,8 @@ struct Mesh
 };
 
 struct Mesh MeshCreate(struct VertexFormat* fmt);
-void MeshDestroy(struct Mesh* m);
-void MeshFinalize(struct Mesh* m, bool is_static);
-void MeshDraw(struct Mesh* m);
+void MeshDestroy(struct Renderer* r, struct Mesh* m);
+void MeshFinalize(struct Renderer* r, struct Mesh* m, bool is_static);
+void MeshDraw(struct Renderer* r, struct Mesh* m);
 
 #endif

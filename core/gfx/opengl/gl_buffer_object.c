@@ -5,7 +5,7 @@
 #include "mem.h"
 #include "gl_type_conv.h"
 
-struct BufferObject* BufferObjectCreate(enum BufferObjectType type)
+struct BufferObject* gl_BufferObjectCreate(enum BufferObjectType type)
 {
   struct BufferObject* buf = Create(struct BufferObject);
   buf->type = type;
@@ -14,17 +14,24 @@ struct BufferObject* BufferObjectCreate(enum BufferObjectType type)
   return buf;
 }
 
-void BufferObjectBind(struct BufferObject* buf)
+void gl_BufferObjectDestroy(struct BufferObject* buf)
+{
+  glDeleteBuffers(1, &buf->handle);
+  LogDebug("destroyed buffer object %d", buf->handle);
+  Destroy(buf);
+}
+
+void gl_BufferObjectBind(struct BufferObject* buf)
 {
   glBindBuffer(BufferObjectTypeToOpenGl(buf->type), buf->handle);
 }
 
-void BufferObjectUnbind(enum BufferObjectType type)
+void gl_BufferObjectUnbind(enum BufferObjectType type)
 {
   glBindBuffer(BufferObjectTypeToOpenGl(type), 0);
 }
 
-void BufferObjectSet(
+void gl_BufferObjectSet(
   struct BufferObject* buf,
   void* data,
   size_t size,
@@ -35,11 +42,4 @@ void BufferObjectSet(
   glBindBuffer(type, buf->handle);
   glBufferData(type, size, data, gl_mode);
   glBindBuffer(type, 0);
-}
-
-void BufferObjectDestroy(struct BufferObject* buf)
-{
-  glDeleteBuffers(1, &buf->handle);
-  LogDebug("destroyed buffer object %d", buf->handle);
-  Destroy(buf);
 }

@@ -98,3 +98,110 @@ uint32_t HashVarName(const char* str, size_t len)
   }
   return hash;
 }
+
+struct Shader* ShaderLoadFromFiles(
+  struct Renderer* r,
+  const char* vert,
+  const char* frag)
+{
+  return r->backend.shader_load_files(vert, frag);
+}
+
+struct Shader* ShaderLoadFromSource(
+  struct Renderer* r,
+  const char* vert,
+  const char* frag)
+{
+  return r->backend.shader_load_src(vert, frag);
+}
+
+void ShaderSendInt(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  int i)
+{
+  return r->backend.shader_send_int(s, name, i);
+}
+
+void ShaderSendFloat(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  float f)
+{
+  return r->backend.shader_send_float(s, name, f);
+}
+
+void ShaderSendVec2f(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  vec2f_t v)
+{
+  return r->backend.shader_send_vec2f(s, name, v);
+}
+
+void ShaderSendVec2i(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  vec2i_t v)
+{
+  return r->backend.shader_send_vec2i(s, name, v);
+}
+
+void ShaderSendVec3f(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  vec3f_t v)
+{
+  return r->backend.shader_send_vec3f(s, name, v);
+}
+
+void ShaderSendVec3i(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  vec3i_t v)
+{
+  return r->backend.shader_send_vec3i(s, name, v);
+}
+
+void ShaderSendVec4f(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  vec4f_t v)
+{
+  return r->backend.shader_send_vec4f(s, name, v);
+}
+
+void ShaderSendVec4i(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  vec4i_t v)
+{
+  return r->backend.shader_send_vec4i(s, name, v);
+}
+
+void ShaderSendMat4(
+  struct Renderer* r,
+  struct Shader* s,
+  const char* name,
+  mat4_t m)
+{
+  return r->backend.shader_send_mat4(s, name, m);
+}
+
+void ShaderBind(struct Renderer* r, struct Shader* s)
+{
+  return r->backend.shader_bind(s);
+}
+
+void ShaderDestroy(struct Renderer* r, struct Shader* s)
+{
+  return r->backend.shader_destroy(s);
+}
