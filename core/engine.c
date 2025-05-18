@@ -31,7 +31,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
   FramebufferResize(engine->renderer, engine->screen, screen_size);
 }
 
-void EngineInit(struct Engine* engine)
+void EngineInit(struct Engine* engine, struct EngineConfig conf)
 {
   LogInfo("initializing engine...");
 
@@ -41,41 +41,31 @@ void EngineInit(struct Engine* engine)
     LogFatal(1, "could not mount vfs at '%s'", vfs_mnt);
   }
 
-  const char* window_title = "DEMONCHIME";
-  vec2i_t window_size = (vec2i_t){320 * 3, 180 * 3};
-  vec2i_t screen_size = (vec2i_t){320, 180};
-
   if (glfwInit() < 0) {
     LogFatal(1, "could not initialize glfw");
   }
 
-  engine->window_handle =
-    glfwCreateWindow(window_size.x, window_size.y, window_title, NULL, NULL);
+  engine->window_handle = glfwCreateWindow(
+    conf.window_size.x, conf.window_size.y, conf.window_title, NULL, NULL);
   if (engine->window_handle == NULL) {
     LogFatal(1, "could not initialize glfw window");
   }
   LogInfo("created glfw window");
 
   glfwMakeContextCurrent(engine->window_handle);
+  glfwSetWindowUserPointer(engine->window_handle, engine);
+  glfwSetFramebufferSizeCallback(
+    engine->window_handle, FramebufferSizeCallback);
+  glfwSwapInterval(conf.vsync);
 
   engine->renderer = NULL;
   InitBackend(engine, GFX_BACKEND_OPENGL);
 
-  glfwSetWindowUserPointer(engine->window_handle, engine);
-
-  glfwSetFramebufferSizeCallback(
-    engine->window_handle, FramebufferSizeCallback);
-
-  glfwSwapInterval(0);
-
-  engine->target_screen_size = screen_size;
-  engine->timer = TimerCreate();
-
+  engine->target_screen_size = conf.screen_size;
   engine->screen_size = (vec2i_t){
-    ceil((float)window_size.x),
-    ceil((float)window_size.y),
+    ceil((float)conf.window_size.x),
+    ceil((float)conf.window_size.y),
   };
-
   engine->screen = FramebufferCreate(
     engine->renderer,
     &engine->vfs,
@@ -83,8 +73,10 @@ void EngineInit(struct Engine* engine)
     FRAMEBUFFER_COLOR_BUF | FRAMEBUFFER_DEPTH_BUF | FRAMEBUFFER_DRAWABLE
   );
 
-  // set up game
 
+  engine->timer = TimerCreate();
+
+  // set up game
   lua_State* L = luaL_newstate();
   luaL_openlibs(L);
   Wrap(L, engine);

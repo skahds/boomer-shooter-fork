@@ -25,7 +25,15 @@ struct Engine
   struct Timer timer;
 };
 
-void EngineInit(struct Engine* engine);
+struct EngineConfig
+{
+  const char* window_title;
+  vec2i_t window_size;
+  vec2i_t screen_size;
+  float vsync;
+};
+
+void EngineInit(struct Engine* engine, struct EngineConfig conf);
 void EngineDestroy(struct Engine* engine);
 bool EngineIsInit(struct Engine* engine);
 
