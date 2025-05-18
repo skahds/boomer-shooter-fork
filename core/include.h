@@ -17,7 +17,6 @@
 # endif
 #endif
 
-// TODO: Temp, replace with a vfs
-char* ReadFile(const char* path);
+char* Concat(const char* lhs, ...);
 
 #endif

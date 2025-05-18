@@ -1,35 +1,35 @@
 #include "include.h"
 #include "mem.h"
 
-char* ReadFile(const char* path)
+#include <stdarg.h>
+#include <string.h>
+
+char* Concat(const char* lhs, ...)
 {
-  FILE* file = fopen(path, "rb");
-  if (file == NULL) {
-    LogError("could not open file '%s'", path);
-    return NULL;
+  const char* str;
+
+  va_list args;
+  va_start(args, lhs);
+
+  size_t len = strlen(lhs);
+
+  while ((str = va_arg(args, const char*))) {
+    len += strlen(str);
   }
 
-  fseek(file, 0L, SEEK_END);
-  size_t file_size = ftell(file);
-  rewind(file);
+  va_end(args);
 
-  char* buf = CreateArray(char, file_size + 1);
-  if (buf == NULL) {
-    LogError("error: file '%s' too large to read", path);
-    return NULL;
+  char* cat = CreateArray(char, len + 1);
+
+  va_start(args, lhs);
+
+  strcpy(cat, lhs);
+  while ((str = va_arg(args, const char*))) {
+    strcat(cat, str);
   }
+  
+  va_end(args);
 
-  size_t bytes_read = fread(buf, sizeof(char), file_size, file);
-  if (bytes_read < file_size) {
-    Destroy(buf);
-    LogError("error: could not read file '%s'", path);
-    return NULL;
-  }
-
-  buf[bytes_read] = '\0';
-
-  fclose(file);
-
-  LogDebug("loaded file '%s'", path);
-  return buf;
+  return cat;
 }
+
