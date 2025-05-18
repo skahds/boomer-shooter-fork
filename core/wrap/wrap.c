@@ -95,11 +95,14 @@ void RegisterFunctions(lua_State* L, const luaL_Reg* funcs)
   }
 }
 
-void ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file)
+bool ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file)
 {
   size_t src_len;
   char* src = VfsReadTxtFile(&engine->vfs, file, &src_len);
-  if (!src) LogFatal(1, "cannot execute '%s'", file);
+  if (!src) {
+    LogWarning("cannot execute '%s'", file);
+    return false;
+  }
   int status = luaL_loadbufferx(L, src, src_len, file, NULL);
   Destroy(src);
 
@@ -107,6 +110,7 @@ void ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file)
     lua_pushcfunction(L, L_ErrorHandler);
     lua_pushvalue(L, -2);
     lua_call(L, 1, 0);
+    return false;
   }
   
   status = lua_pcall(L, 0, 0, 0);
@@ -114,7 +118,10 @@ void ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file)
     lua_pushcfunction(L, L_ErrorHandler);
     lua_pushvalue(L, -2);
     lua_call(L, 1, 0);
+    return false;
   }
+
+  return true;
 }
 
 void LuaRawInsert(lua_State* L, int t, int v, int pos)

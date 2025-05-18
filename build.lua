@@ -27,7 +27,7 @@ end
 
 table.insert(defines, "bse_allow_opengl")
 
-AddTarget("chime", "exe", {
+AddTarget("DEMONCHIME", "exe", {
   src = {
     "main.c",
     "core/include.c",

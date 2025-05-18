@@ -6,6 +6,7 @@
 #include "gfx/framebuffer.h"
 #include "math.h"
 #include "mem.h"
+#include "wrap/wrap.h"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -30,7 +31,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
   FramebufferResize(engine->renderer, engine->screen, screen_size);
 }
 
-void EngineInit(struct Engine* engine, const char* window_title)
+void EngineInit(struct Engine* engine)
 {
   LogInfo("initializing engine...");
 
@@ -40,12 +41,16 @@ void EngineInit(struct Engine* engine, const char* window_title)
     LogFatal(1, "could not mount vfs at '%s'", vfs_mnt);
   }
 
+  const char* window_title = "DEMONCHIME";
+  vec2i_t window_size = (vec2i_t){320 * 3, 180 * 3};
+  vec2i_t screen_size = (vec2i_t){320, 180};
+
   if (glfwInit() < 0) {
     LogFatal(1, "could not initialize glfw");
   }
 
   engine->window_handle =
-    glfwCreateWindow(320 * 3, 180 * 3, window_title, NULL, NULL);
+    glfwCreateWindow(window_size.x, window_size.y, window_title, NULL, NULL);
   if (engine->window_handle == NULL) {
     LogFatal(1, "could not initialize glfw window");
   }
@@ -61,13 +66,11 @@ void EngineInit(struct Engine* engine, const char* window_title)
   glfwSetFramebufferSizeCallback(
     engine->window_handle, FramebufferSizeCallback);
 
-  engine->L = NULL;
-  engine->lua_error_handler_index = 0;
+  glfwSwapInterval(0);
 
-  engine->target_screen_size = (vec2i_t){320, 180};
+  engine->target_screen_size = screen_size;
   engine->timer = TimerCreate();
 
-  vec2i_t window_size = EngineGetWindowSize(engine);
   engine->screen_size = (vec2i_t){
     ceil((float)window_size.x),
     ceil((float)window_size.y),
@@ -79,11 +82,24 @@ void EngineInit(struct Engine* engine, const char* window_title)
     engine->screen_size,
     FRAMEBUFFER_COLOR_BUF | FRAMEBUFFER_DEPTH_BUF | FRAMEBUFFER_DRAWABLE
   );
+
+  // set up game
+
+  lua_State* L = luaL_newstate();
+  luaL_openlibs(L);
+  Wrap(L, engine);
+
+  LogInfo("starting game...");
+  if (!ProtectedDoFile(L, engine, "game/main.lua")) {
+    LogFatal(1, "was not able to run game");
+  }
 }
 
 void EngineDestroy(struct Engine* engine)
 {
   LogInfo("destroying engine...");
+
+  lua_close(engine->L);
 
   FramebufferDestroy(engine->renderer, engine->screen);
 

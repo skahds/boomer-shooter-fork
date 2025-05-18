@@ -25,7 +25,7 @@ struct Engine
   struct Timer timer;
 };
 
-void EngineInit(struct Engine* engine, const char* window_title);
+void EngineInit(struct Engine* engine);
 void EngineDestroy(struct Engine* engine);
 bool EngineIsInit(struct Engine* engine);
 

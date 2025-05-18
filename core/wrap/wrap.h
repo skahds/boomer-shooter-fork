@@ -49,7 +49,7 @@ void CreateLuaData(
 void* ReadLuaData(lua_State* L, int index, enum LuaDataType expected);
 struct Engine* GetEngine(lua_State* L);
 void RegisterFunctions(lua_State* L, const luaL_Reg* funcs);
-void ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file);
+bool ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file);
 void LuaRawInsert(lua_State* L, int t, int k, int pos);
 
 void Wrap(lua_State* L, struct Engine* engine);
