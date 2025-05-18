@@ -62,6 +62,25 @@ enum VfsError VfsInit(struct Vfs* vfs, const char* path)
   return VFS_OK;
 }
 
+bool VfsDoesFileExist(struct Vfs* vfs, const char* path)
+{
+  if (!IsFilenameValid(path)) return false;
+  path = RemoveCwdPrefix(path);
+
+  if (vfs->type == VFS_DIR) {
+    struct stat stats;
+    char* full_path = Concat(vfs->path, "/", path, NULL);
+    if (!full_path) return false;
+    int res = stat(full_path, &stats);
+    Destroy(full_path);
+    return res == 0;
+  } else if (vfs->type == VFS_ZIP) {
+    int index = mz_zip_reader_locate_file(&vfs->zip, path, NULL, 0);
+    return index != -1;
+  }
+  return false;
+}
+
 char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size)
 {
   if (!IsFilenameValid(path)) {
@@ -181,6 +200,8 @@ char* VfsReadTxtFile(struct Vfs* vfs, const char* path, size_t* size)
     }
     memcpy(dat, zdat, zdat_size);
     dat[zdat_size] = '\0';
+
+    if (size) *size = zdat_size;
 
     free(zdat);
 

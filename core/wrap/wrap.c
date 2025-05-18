@@ -1,5 +1,7 @@
 #include "wrap.h"
 
+#include "mem.h"
+
 static int L_ErrorHandler(lua_State* L)
 {
   lua_getglobal(L, "debug");
@@ -95,11 +97,46 @@ void RegisterFunctions(lua_State* L, const luaL_Reg* funcs)
 
 void ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file)
 {
-  if (luaL_dofile(L, file) != LUA_OK) {
+  size_t src_len;
+  char* src = VfsReadTxtFile(&engine->vfs, file, &src_len);
+  if (!src) LogFatal(1, "cannot execute '%s'", file);
+  int status = luaL_loadbufferx(L, src, src_len, file, NULL);
+  Destroy(src);
+
+  if (status != LUA_OK) {
     lua_pushcfunction(L, L_ErrorHandler);
     lua_pushvalue(L, -2);
     lua_call(L, 1, 0);
   }
+  
+  status = lua_pcall(L, 0, 0, 0);
+  if (status != LUA_OK) {
+    lua_pushcfunction(L, L_ErrorHandler);
+    lua_pushvalue(L, -2);
+    lua_call(L, 1, 0);
+  }
+}
+
+void LuaRawInsert(lua_State* L, int t, int v, int pos)
+{
+  if (t < 0) t = lua_gettop(L) + 1 + t;
+  if (v < 0) v = lua_gettop(L) + 1 + v;
+
+  if (pos == -1) {
+    lua_pushvalue(L, v);
+    lua_rawseti(L, t, lua_objlen(L, t) + 1);
+    return;
+  } else {
+    pos = lua_objlen(L, t) + 1 + pos;
+  }
+
+  for (int i = lua_objlen(L, t) + 1; i > pos; i--) {
+    lua_rawgeti(L, t, i - 1);
+    lua_rawseti(L, t, i);
+  }
+
+  lua_pushvalue(L, v);
+  lua_rawseti(L, t, pos);
 }
 
 void Wrap(lua_State* L, struct Engine* engine)

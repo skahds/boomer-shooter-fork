@@ -22,7 +22,7 @@ static void MessageCallback(
 {
   switch (severity) {
     case GL_DEBUG_SEVERITY_NOTIFICATION:
-      LogDebug("[" TEXT_DARK_GRAY "OpenGL" TEXT_NORMAL "] %s", message);
+      // LogDebug("[" TEXT_DARK_GRAY "OpenGL" TEXT_NORMAL "] %s", message);
       return;
     default:
       LogWarning("[" TEXT_DARK_GRAY "OpenGL" TEXT_NORMAL "] %s", message);

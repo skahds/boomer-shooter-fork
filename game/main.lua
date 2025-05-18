@@ -1,3 +1,4 @@
+package.path = "./?/init.lua;" .. package.path
 package.path = package.path .. ";game/?.lua;game/?/init.lua"
 local gcore = require("core")
 

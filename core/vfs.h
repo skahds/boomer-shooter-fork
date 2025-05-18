@@ -32,6 +32,7 @@ struct Vfs
 
 enum VfsError VfsInit(struct Vfs* vfs, const char* path);
 void VfsDestroy(struct Vfs* vfs);
+bool VfsDoesFileExist(struct Vfs* vfs, const char* path);
 // read the entirity of a file
 char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size);
 // same as `VfsReadFile`, except it adds a null terminator

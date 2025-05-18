@@ -34,7 +34,7 @@ void EngineInit(struct Engine* engine, const char* window_title)
 {
   LogInfo("initializing engine...");
 
-  const char* vfs_mnt = "./";
+  const char* vfs_mnt = "./dat.zip";
   enum VfsError vfs_err = VfsInit(&engine->vfs, vfs_mnt);
   if (vfs_err) {
     LogFatal(1, "could not mount vfs at '%s'", vfs_mnt);
