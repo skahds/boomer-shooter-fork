@@ -43,6 +43,8 @@ AddTarget("chime", "exe", {
     "core/prng.h",
     "core/timer.c",
     "core/timer.h",
+    "core/vfs.c",
+    "core/vfs.h",
     "core/math/defs.h",
     "core/math/mat4.c",
     "core/math/mat4.h",

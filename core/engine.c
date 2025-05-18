@@ -5,6 +5,7 @@
 #include "gfx/gfx.h"
 #include "gfx/framebuffer.h"
 #include "math.h"
+#include "mem.h"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -37,6 +38,8 @@ void EngineInit(struct Engine* engine, const char* window_title)
     LogFatal(1, "could not initialize glfw");
   }
 
+  VfsInit(&engine->vfs, "./");
+
   engine->window_handle =
     glfwCreateWindow(320 * 3, 180 * 3, window_title, NULL, NULL);
   if (engine->window_handle == NULL) {
@@ -46,6 +49,7 @@ void EngineInit(struct Engine* engine, const char* window_title)
 
   glfwMakeContextCurrent(engine->window_handle);
 
+  engine->renderer = NULL;
   InitBackend(engine, GFX_BACKEND_OPENGL);
 
   glfwSetWindowUserPointer(engine->window_handle, engine);
@@ -67,6 +71,7 @@ void EngineInit(struct Engine* engine, const char* window_title)
 
   engine->screen = FramebufferCreate(
     engine->renderer,
+    &engine->vfs,
     engine->screen_size,
     FRAMEBUFFER_COLOR_BUF | FRAMEBUFFER_DEPTH_BUF | FRAMEBUFFER_DRAWABLE
   );
@@ -77,6 +82,9 @@ void EngineDestroy(struct Engine* engine)
   LogInfo("destroying engine...");
 
   FramebufferDestroy(engine->renderer, engine->screen);
+
+  if (engine->renderer != NULL)
+    Destroy(engine->renderer);
 
   glfwDestroyWindow(engine->window_handle);
   // for some reason this causes a false positive(?) memory leak with asan.

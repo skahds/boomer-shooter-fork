@@ -8,12 +8,14 @@
 #include "math/vec2i.h"
 #include "math/vec2f.h"
 #include "timer.h"
+#include "vfs.h"
 
 struct Engine
 {
   struct GLFWwindow* window_handle;
   lua_State* L;
   struct Renderer* renderer;
+  struct Vfs vfs;
   int lua_error_handler_index;
 
   vec2i_t target_screen_size;

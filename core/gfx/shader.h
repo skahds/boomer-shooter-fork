@@ -45,6 +45,7 @@ uint32_t HashVarName(const char* name, size_t len);
 
 struct Shader* ShaderLoadFromFiles(
   struct Renderer* r,
+  struct Vfs* vfs,
   const char* vert,
   const char* frag
 );

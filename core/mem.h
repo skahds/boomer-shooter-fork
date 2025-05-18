@@ -9,6 +9,7 @@
 #define CreateArray(T, e) ((T*)malloc(sizeof(T) * (e)))
 #define CreateVoidArray(size, e) ((void*)malloc((size) * (e)))
 #define Create(T) ((T*)malloc(sizeof(T)))
+#define CreateSized(T, size) ((T*)malloc(size))
 #define Destroy(ptr) free(ptr)
 
 #endif

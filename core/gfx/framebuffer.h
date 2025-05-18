@@ -10,6 +10,7 @@ struct Framebuffer;
 
 struct Framebuffer* FramebufferCreate(
   struct Renderer* r,
+  struct Vfs* vfs,
   vec2i_t size,
   uint8_t flags
 );

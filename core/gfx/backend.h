@@ -20,6 +20,7 @@ struct Image;
 struct Texture;
 struct Shader;
 struct Framebuffer;
+struct Vfs;
 
 typedef void (*ClearBackgroundFn)(float r, float g, float b);
 typedef void (*AdjustViewportFn)(vec2f_t size);
@@ -56,7 +57,11 @@ typedef void (*VertexArrayDrawIndexedFn)(
   enum IndexMode index_mode
 );
 
-typedef struct Framebuffer* (*FramebufferCreateFn)(vec2i_t size, uint8_t flags);
+typedef struct Framebuffer* (*FramebufferCreateFn)(
+  struct Vfs* vfs,
+  vec2i_t size,
+  uint8_t flags
+);
 typedef void (*FramebufferDestroyFn)(struct Framebuffer* fb);
 typedef void (*FramebufferBindFn)(struct Framebuffer* fb);
 typedef void (*FramebufferResizeFn)(struct Framebuffer* fb, vec2i_t size);
@@ -67,6 +72,7 @@ typedef void (*FramebufferDrawFn)(
 );
 
 typedef struct Shader* (*ShaderLoadFromFilesFn)(
+  struct Vfs* vfs,
   const char* vert,
   const char* frag
 );

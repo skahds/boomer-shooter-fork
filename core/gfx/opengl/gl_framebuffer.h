@@ -18,7 +18,11 @@ struct Framebuffer
   struct BufferObject* vbo;
 };
 
-struct Framebuffer* gl_FramebufferCreate(vec2i_t size, uint8_t flags);
+struct Framebuffer* gl_FramebufferCreate(
+  struct Vfs* vfs,
+  vec2i_t size,
+  uint8_t flags
+);
 void gl_FramebufferDestroy(struct Framebuffer* fb);
 void gl_FramebufferBind(struct Framebuffer* fb);
 void gl_FramebufferResize(struct Framebuffer* fb, vec2i_t size);

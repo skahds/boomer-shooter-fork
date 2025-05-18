@@ -101,10 +101,11 @@ uint32_t HashVarName(const char* str, size_t len)
 
 struct Shader* ShaderLoadFromFiles(
   struct Renderer* r,
+  struct Vfs* vfs,
   const char* vert,
   const char* frag)
 {
-  return r->backend.shader_load_files(vert, frag);
+  return r->backend.shader_load_files(vfs, vert, frag);
 }
 
 struct Shader* ShaderLoadFromSource(

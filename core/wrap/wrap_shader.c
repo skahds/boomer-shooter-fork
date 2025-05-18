@@ -5,10 +5,15 @@
 
 static int L_LoadShader(lua_State* L)
 {
-  struct Renderer* r = GetEngine(L)->renderer;
+  struct Engine* engine = GetEngine(L);
   const char* vert_path = luaL_checkstring(L, 1);
   const char* frag_path = luaL_checkstring(L, 2);
-  struct Shader* shader = ShaderLoadFromFiles(r, vert_path, frag_path);
+  struct Shader* shader = ShaderLoadFromFiles(
+    engine->renderer,
+    &engine->vfs,
+    vert_path,
+    frag_path
+  );
   CreateLuaData(L, shader, SHADER_MT_NAME, LUA_TYPE_SHADER);
   return 1;
 }

@@ -2,10 +2,11 @@
 
 struct Framebuffer* FramebufferCreate(
   struct Renderer* r,
+  struct Vfs* vfs,
   vec2i_t size,
   uint8_t flags)
 {
-  return r->backend.framebuffer_create(size, flags);
+  return r->backend.framebuffer_create(vfs, size, flags);
 }
 
 void FramebufferDestroy(struct Renderer* r, struct Framebuffer* fb)

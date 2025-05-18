@@ -82,7 +82,10 @@ static void GenerateTextures(struct Framebuffer* fb)
   }
 }
 
-struct Framebuffer* gl_FramebufferCreate(vec2i_t size, uint8_t flags)
+struct Framebuffer* gl_FramebufferCreate(
+  struct Vfs* vfs,
+  vec2i_t size,
+  uint8_t flags)
 {
   struct Framebuffer* fb = Create(struct Framebuffer);
 
@@ -112,6 +115,7 @@ struct Framebuffer* gl_FramebufferCreate(vec2i_t size, uint8_t flags)
 
     if (framebuffer_draw_shader == NULL) {
       framebuffer_draw_shader = gl_ShaderLoadFromFiles(
+        vfs,
         "res/vfbdraw.glsl",
         "res/ffbdraw.glsl"
       );

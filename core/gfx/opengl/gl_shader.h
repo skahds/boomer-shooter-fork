@@ -10,7 +10,11 @@ struct Shader
   struct ShaderTable attrs;
 };
 
-struct Shader* gl_ShaderLoadFromFiles(const char* vert, const char* frag);
+struct Shader* gl_ShaderLoadFromFiles(
+  struct Vfs* vfs,
+  const char* vert,
+  const char* frag
+);
 struct Shader* gl_ShaderLoadFromSource(const char* vert, const char* frag);
 void gl_ShaderSendInt(struct Shader* s, const char* name, int i);
 void gl_ShaderSendFloat(struct Shader* s, const char* name, float f);

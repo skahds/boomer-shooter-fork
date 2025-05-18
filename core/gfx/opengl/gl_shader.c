@@ -108,10 +108,13 @@ static uint32_t CompileSource(const char* name, const char* src, uint32_t type)
   return h;
 }
 
-struct Shader* gl_ShaderLoadFromFiles(const char* vert, const char* frag)
+struct Shader* gl_ShaderLoadFromFiles(
+  struct Vfs* vfs,
+  const char* vert,
+  const char* frag)
 {
-  char* vsrc = ReadFile(vert);
-  char* fsrc = ReadFile(frag);
+  char* vsrc = VfsReadFile(vfs, vert, NULL);//ReadFile(vert);
+  char* fsrc = VfsReadFile(vfs, frag, NULL);//ReadFile(frag);
   uint32_t vertex_handle = CompileSource(vert, vsrc, GL_VERTEX_SHADER);
   uint32_t fragment_handle = CompileSource(frag, fsrc, GL_FRAGMENT_SHADER);
   Destroy(vsrc);
