@@ -54,7 +54,7 @@ static char* Concat(const char* lhs, ...)
 // removes ./ from the beginning of paths
 static const char* RemoveCwdPrefix(const char* path)
 {
-  if (path[0] == '.' && path[1] == '/') return path + 2;
+  if (path[0] == '.' && IsCharPathSep(path[1])) return path + 2;
   return path;
 }
 
@@ -66,32 +66,96 @@ static bool IsPathDir(const char* path)
   return res == 0 && S_ISDIR(f.st_mode);
 }
 
+static bool IsFilenameValid(const char *filename) {
+  return !(
+    *filename == '/' ||
+    strstr(filename, "..") ||
+    strstr(filename, ":\\"));
+}
 enum VfsError VfsInit(struct Vfs* vfs, const char* path)
 {
   bool is_dir = IsPathDir(path);
-  mz_zip_archive zip;
-  if (!is_dir && !mz_zip_reader_init_file(&zip, path, 0))
-    return VFS_MALFORMED_PATH;
+  memset(&vfs->zip, 0, sizeof(mz_zip_archive));
+  if (!is_dir && !mz_zip_reader_init_file(&vfs->zip, path, 0))
+    return VFS_COULD_NOT_MOUNT;
 
   size_t len = strlen(path);
   vfs->path = CreateArray(char, len + 1);
+  if (!vfs->path) return VFS_OUT_OF_MEM;
   strcpy(vfs->path, path);
+  if (IsCharPathSep(vfs->path[len - 1])) vfs->path[len - 1] = '\0';
 
-  if (vfs->path[len - 1] == '/') vfs->path[len - 1] = '\0';
+  vfs->type = is_dir ? VFS_DIR : VFS_ZIP;
 
-  if (is_dir) {
-    vfs->type = VFS_DIR;
-  } else {
-    vfs->type = VFS_ZIP;
-    vfs->zip = zip;
-  }
+  LogInfo("mounted vfs at '%s'", path);
   
   return VFS_OK;
 }
 
 char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size)
 {
+  if (!IsFilenameValid(path)) {
+    LogWarning("could not load '%s', because the path is invalid", path);
+    return NULL;
+  }
   const char* lpath = RemoveCwdPrefix(path);
+
+  if (vfs->type == VFS_DIR) {
+    char* full_path = Concat(vfs->path, "/", lpath, NULL);
+    FILE* file = fopen(full_path, "rb");
+    if (file == NULL) {
+      LogWarning("could not open file '%s'", full_path);
+      Destroy(full_path);
+      return NULL;
+    }
+
+    fseek(file, 0L, SEEK_END);
+    size_t file_size = ftell(file);
+    rewind(file);
+
+    char* dat = CreateArray(char, file_size);
+    if (dat == NULL) {
+      LogWarning("ran out of memory to read '%s'", full_path);
+      Destroy(full_path);
+      return NULL;
+    }
+
+    size_t bytes_read = fread(dat, sizeof(char), file_size, file);
+    if (bytes_read < file_size) {
+      LogWarning("could not read file '%s'", full_path);
+      Destroy(dat);
+      Destroy(full_path);
+      return NULL;
+    }
+    fclose(file);
+
+    if (size) *size = file_size;
+
+    LogDebug("loaded file '%s'", full_path);
+    Destroy(full_path);
+
+    return dat;
+  } else if (vfs->type == VFS_ZIP) {
+    char* dat = mz_zip_reader_extract_file_to_heap(
+      &vfs->zip, lpath, size, 0);
+    if (!dat) {
+      LogWarning("could not load file '%s'", path);
+      return NULL;
+    }
+    LogDebug("loaded file '%s'");
+    return dat;
+  }
+  return NULL;
+}
+
+char* VfsReadTxtFile(struct Vfs* vfs, const char* path, size_t* size)
+{
+  if (!IsFilenameValid(path)) {
+    LogWarning("could not load '%s', because the path is invalid", path);
+    return NULL;
+  }
+  const char* lpath = RemoveCwdPrefix(path);
+
   if (vfs->type == VFS_DIR) {
     char* full_path = Concat(vfs->path, "/", lpath, NULL);
     FILE* file = fopen(full_path, "rb");
@@ -128,19 +192,36 @@ char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size)
     Destroy(full_path);
 
     return dat;
-  } else {
-    char* dat = mz_zip_reader_extract_file_to_heap(&vfs->zip, lpath, size, 0);
+  } else if (vfs->type == VFS_ZIP) {
+    size_t zdat_size;
+    char* zdat = mz_zip_reader_extract_file_to_heap(
+      &vfs->zip, lpath, &zdat_size, 0);
+    if (!zdat) {
+      LogWarning("could not load file '%s'", path);
+      return NULL;
+    }
+
+    // miniz doesn't null terminate their stuff :(
+
+    char* dat = CreateArray(char, zdat_size + 1);
+    if (!dat) {
+      LogWarning("could not load file '%s'", path);
+      free(zdat);
+      return NULL;
+    }
+    memcpy(dat, zdat, zdat_size);
+    dat[zdat_size] = '\0';
+
+    free(zdat);
 
     LogDebug("loaded file '%s'");
-    if (dat) return dat;
+    return dat;
   }
   return NULL;
 }
 
 void VfsDestroy(struct Vfs* vfs)
 {
-  if (vfs->type == VFS_ZIP) {
-    mz_zip_reader_end(&vfs->zip);
-  }
+  if (vfs->type == VFS_ZIP) mz_zip_reader_end(&vfs->zip);
   Destroy(vfs->path);
 }

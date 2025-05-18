@@ -1,8 +1,11 @@
 #include "texture.h"
 
-struct Texture TextureLoad(struct Renderer* r, const char* path)
+struct Texture TextureLoad(
+  struct Renderer* r,
+  struct Vfs* vfs,
+  const char* path)
 {
-  struct Image img = ImageLoad(path);
+  struct Image img = ImageLoad(vfs, path);
   struct Texture tex = TextureLoadFromImg(r, &img);
   ImageDestroy(&img);
   return tex;

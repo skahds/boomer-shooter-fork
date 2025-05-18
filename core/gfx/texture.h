@@ -19,7 +19,11 @@ struct Texture
   enum TextureWrap y_wrap;
 };
 
-struct Texture TextureLoad(struct Renderer* r, const char* path);
+struct Texture TextureLoad(
+  struct Renderer* r,
+  struct Vfs* vfs,
+  const char* path
+);
 struct Texture TextureLoadFromImg(struct Renderer* r, struct Image* img);
 void TextureDestroy(struct Renderer* r, struct Texture* tex);
 void TextureGenerateMipmaps(struct Renderer* r, struct Texture* tex);

@@ -3,15 +3,12 @@
 
 #include "include.h"
 
-#define fseeko fseek
-#define ftello ftell
-#define fseeko64 fseek
-#define ftello64 ftell
 #include "miniz.h"
 
 enum VfsError
 {
   VFS_OK = 0,
+  VFS_COULD_NOT_MOUNT,
   VFS_FILE_NOT_FOUND,
   VFS_OUT_OF_MEM,
   VFS_MALFORMED_PATH,
@@ -37,5 +34,7 @@ enum VfsError VfsInit(struct Vfs* vfs, const char* path);
 void VfsDestroy(struct Vfs* vfs);
 // read the entirity of a file
 char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size);
+// same as `VfsReadFile`, except it adds a null terminator
+char* VfsReadTxtFile(struct Vfs* vfs, const char* path, size_t* size);
 
 #endif

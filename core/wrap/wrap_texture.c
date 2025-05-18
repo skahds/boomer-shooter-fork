@@ -5,10 +5,10 @@
 
 static int L_LoadTexture(lua_State* L)
 {
-  struct Renderer* r = GetEngine(L)->renderer;
+  struct Engine* engine = GetEngine(L);
   const char* path = luaL_checkstring(L, 1);
   struct Texture* tex = Create(struct Texture);
-  *tex = TextureLoad(r, path);
+  *tex = TextureLoad(engine->renderer, &engine->vfs, path);
   CreateLuaData(L, tex, TEXTURE_MT_NAME, LUA_TYPE_TEXTURE);
   return 1;
 }

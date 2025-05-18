@@ -113,8 +113,8 @@ struct Shader* gl_ShaderLoadFromFiles(
   const char* vert,
   const char* frag)
 {
-  char* vsrc = VfsReadFile(vfs, vert, NULL);//ReadFile(vert);
-  char* fsrc = VfsReadFile(vfs, frag, NULL);//ReadFile(frag);
+  char* vsrc = VfsReadTxtFile(vfs, vert, NULL);//ReadFile(vert);
+  char* fsrc = VfsReadTxtFile(vfs, frag, NULL);//ReadFile(frag);
   uint32_t vertex_handle = CompileSource(vert, vsrc, GL_VERTEX_SHADER);
   uint32_t fragment_handle = CompileSource(frag, fsrc, GL_FRAGMENT_SHADER);
   Destroy(vsrc);

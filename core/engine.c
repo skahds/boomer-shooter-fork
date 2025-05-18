@@ -34,11 +34,15 @@ void EngineInit(struct Engine* engine, const char* window_title)
 {
   LogInfo("initializing engine...");
 
+  const char* vfs_mnt = "./";
+  enum VfsError vfs_err = VfsInit(&engine->vfs, vfs_mnt);
+  if (vfs_err) {
+    LogFatal(1, "could not mount vfs at '%s'", vfs_mnt);
+  }
+
   if (glfwInit() < 0) {
     LogFatal(1, "could not initialize glfw");
   }
-
-  VfsInit(&engine->vfs, "./");
 
   engine->window_handle =
     glfwCreateWindow(320 * 3, 180 * 3, window_title, NULL, NULL);
@@ -87,6 +91,8 @@ void EngineDestroy(struct Engine* engine)
     Destroy(engine->renderer);
 
   glfwDestroyWindow(engine->window_handle);
+
+  VfsDestroy(&engine->vfs);
   // for some reason this causes a false positive(?) memory leak with asan.
   // but i fairly sure it doesn't actually, but i'm keeping it off for debug
   // builds regardless for my own sanity

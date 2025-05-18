@@ -14,11 +14,18 @@ static enum ImageFormat ImageFormatFromChannelCount(int channels)
   return IMAGE_FORMAT_INVALID;
 }
 
-struct Image ImageLoad(const char* path)
+struct Image ImageLoad(struct Vfs* vfs, const char* path)
 {
   vec2i_t size;
   int channel_count;
-  uint8_t* data = stbi_load(path, &size.x, &size.y, &channel_count, 0);
+  size_t file_dat_len;
+  uint8_t* file_dat = (uint8_t*)VfsReadFile(vfs, path, &file_dat_len);
+  if (!file_dat)
+    LogFatal(1, "could not load texture '%s'", path);
+  uint8_t* data = stbi_load_from_memory(
+    file_dat, file_dat_len, &size.x, &size.y, &channel_count, 0);
+  Destroy(file_dat);
+  // uint8_t* data = stbi_load(path, &size.x, &size.y, &channel_count, 0);
 
   enum ImageFormat format = ImageFormatFromChannelCount(channel_count);
 
