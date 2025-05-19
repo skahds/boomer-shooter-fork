@@ -98,7 +98,7 @@ void RegisterFunctions(lua_State* L, const luaL_Reg* funcs)
 bool ProtectedDoFile(lua_State* L, struct Engine* engine, const char* file)
 {
   size_t src_len;
-  char* src = VfsReadTxtFile(&engine->vfs, file, &src_len);
+  char* src = VfsReadTxtFile(engine->vfs, file, &src_len);
   if (!src) {
     LogWarning("cannot execute '%s'", file);
     return false;

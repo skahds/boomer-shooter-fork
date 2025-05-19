@@ -36,7 +36,8 @@ void EngineInit(struct Engine* engine, struct EngineConfig conf)
 {
   LogInfo("initializing engine...");
 
-  enum VfsError vfs_err = VfsInit(&engine->vfs, conf.mount_path);
+  engine->vfs = NULL;
+  enum VfsError vfs_err = VfsMount(&engine->vfs, conf.mount_path);
   if (vfs_err) {
     LogFatal(1, "could not mount vfs at '%s'", conf.mount_path);
   }
@@ -68,15 +69,17 @@ void EngineInit(struct Engine* engine, struct EngineConfig conf)
   };
   engine->screen = FramebufferCreate(
     engine->renderer,
-    &engine->vfs,
+    engine->vfs,
     engine->screen_size,
     FRAMEBUFFER_COLOR_BUF | FRAMEBUFFER_DEPTH_BUF | FRAMEBUFFER_DRAWABLE
   );
 
 
   engine->timer = TimerCreate();
+}
 
-  // set up game
+void EngineInitLua(struct Engine* engine)
+{
   lua_State* L = luaL_newstate();
   luaL_openlibs(L);
   Wrap(L, engine);
@@ -100,7 +103,7 @@ void EngineDestroy(struct Engine* engine)
 
   glfwDestroyWindow(engine->window_handle);
 
-  VfsDestroy(&engine->vfs);
+  VfsDestroy(engine->vfs);
   // for some reason this causes a false positive(?) memory leak with asan.
   // but i fairly sure it doesn't actually, but i'm keeping it off for debug
   // builds regardless for my own sanity

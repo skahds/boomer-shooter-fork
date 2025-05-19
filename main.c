@@ -20,6 +20,10 @@ int main(int argc, const char* args[])
   struct Engine engine;
   EngineInit(&engine, conf);
 
+  VfsMount(&engine.vfs, "dat.zip");
+
+  EngineInitLua(&engine);
+
   while (!EngineIsClosed(&engine))
   {
     EngineUpdate(&engine);

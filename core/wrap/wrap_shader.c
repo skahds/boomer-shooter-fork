@@ -10,7 +10,7 @@ static int L_LoadShader(lua_State* L)
   const char* frag_path = luaL_checkstring(L, 2);
   struct Shader* shader = ShaderLoadFromFiles(
     engine->renderer,
-    &engine->vfs,
+    engine->vfs,
     vert_path,
     frag_path
   );

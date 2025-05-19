@@ -31,7 +31,7 @@ struct Vfs
   char* path;
 };
 
-enum VfsError VfsInit(struct Vfs* vfs, const char* path);
+enum VfsError VfsMount(struct Vfs** vfs, const char* path);
 void VfsDestroy(struct Vfs* vfs);
 bool VfsDoesFileExist(struct Vfs* vfs, const char* path);
 // read the entirity of a file

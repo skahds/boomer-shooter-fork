@@ -15,7 +15,7 @@ struct Engine
   struct GLFWwindow* window_handle;
   lua_State* L;
   struct Renderer* renderer;
-  struct Vfs vfs;
+  struct Vfs* vfs;
   int lua_error_handler_index;
 
   vec2i_t target_screen_size;
@@ -35,6 +35,7 @@ struct EngineConfig
 };
 
 void EngineInit(struct Engine* engine, struct EngineConfig conf);
+void EngineInitLua(struct Engine* engine);
 void EngineDestroy(struct Engine* engine);
 bool EngineIsInit(struct Engine* engine);
 

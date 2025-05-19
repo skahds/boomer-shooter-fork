@@ -165,10 +165,10 @@ static int L_Loader(lua_State* L)
     path[path_len] = '\0';
 
     // check if file exists
-    if (VfsDoesFileExist(&engine->vfs, path)) {
+    if (VfsDoesFileExist(engine->vfs, path)) {
       // it does; load
       size_t src_len;
-      char* src = VfsReadTxtFile(&engine->vfs, path, &src_len);
+      char* src = VfsReadTxtFile(engine->vfs, path, &src_len);
       if (src == NULL)
         return luaL_error(L, "error loading file");
 
