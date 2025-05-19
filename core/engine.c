@@ -38,9 +38,9 @@ void EngineInit(struct Engine* engine, struct EngineConfig conf)
 
   engine->vfs = NULL;
   enum VfsError vfs_err = VfsMount(&engine->vfs, conf.mount_path);
-  if (vfs_err) {
-    LogFatal(1, "could not mount vfs at '%s'", conf.mount_path);
-  }
+  if (vfs_err) LogFatal(1, "could not mount '%s'", conf.mount_path);
+  vfs_err = VfsMount(&engine->vfs, "CORE.HAD");
+  if (vfs_err) LogFatal(1, "could not mount 'CORE.HAD'");
 
   if (glfwInit() < 0) {
     LogFatal(1, "could not initialize glfw");

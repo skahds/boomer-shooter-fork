@@ -87,6 +87,7 @@ cube:Finalize(true)
 local r = 0
 local rx = gcore.CreateLerpedNumber()
 local ry = gcore.CreateLerpedNumber()
+local rz = gcore.CreateLerpedNumber()
 
 function step()
   if core.IsKeyDown(core.key.ESCAPE) then
@@ -100,6 +101,7 @@ function step()
   r = r + (1/30)
   rx:set(r * 0.25)
   ry:set(r)
+  rz:set(r * 0.1)
 end
 
 function draw()
@@ -112,7 +114,7 @@ function draw()
     -- rx = 0,
     rx = rx:get(),--math.rad(-24),
     ry = ry:get(),--math.rad(45),
-    rz = 0,
+    rz = rz:get(),
     sx = 1,
     sz = 1,
     sy = 1,

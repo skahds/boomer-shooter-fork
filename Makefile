@@ -9,6 +9,8 @@ LDFLAGS =
 PROJECT_NAME = DEMONCHIME
 
 EXE = $(PROJECT_NAME)
+# HAD files store game content
+# this one contains every core resource and script
 OBJ = \
 	main.o core/include.o core/log.o core/engine.o core/image.o core/prng.o \
 	core/timer.o core/vfs.o core/math/mat4.o core/math/transform.o \
@@ -23,7 +25,13 @@ OBJ = \
 	core/gfx/opengl/gl_texture.o core/gfx/opengl/gl_type_conv.o \
 	core/gfx/opengl/gl_vertex_array.o lib/glad/src/glad.o lib/stb/stb.o
 
-CLEAN_FILES = $(OBJ) $(OBJ:%.o=%.d) $(EXE)
+CORE_HAD = CORE.HAD
+CORE_HAD_DIR = core/had
+CORE_HAD_FILES = \
+	core/init.lua core/LerpedNumber.lua \
+	res/fdefault.glsl res/vdefault.glsl res/ffbdraw.glsl res/vfbdraw.glsl
+
+CLEAN_FILES = $(OBJ) $(OBJ:%.o=%.d) $(EXE) $(CORE_HAD)
 
 RM = rm -f
 
@@ -56,7 +64,7 @@ endif
 
 .PHONY: all clean compile_flags
 
-all: $(EXE)
+all: $(EXE) $(CORE_HAD)
 
 $(EXE): $(OBJ)
 	@echo "cc $@"
@@ -65,6 +73,14 @@ $(EXE): $(OBJ)
 %.o: %.c
 	@echo "cc $< -> $@"
 	@$(CC) -o $@ -c $< $(CFLAGS) -MMD
+
+$(CORE_HAD): $(CORE_HAD_FILES:%=$(CORE_HAD_DIR)/%)
+	@echo "had $@"
+ifeq (Linux,$(HOST_SYS))
+	@$(RM) CORE.HAD
+	@(cd $(CORE_HAD_DIR) && zip -r - $(CORE_HAD_FILES)) > $(CORE_HAD)
+endif
+# TODO: handle windows
 
 clean:
 	$(RM) $(CLEAN_FILES)
