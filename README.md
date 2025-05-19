@@ -2,7 +2,10 @@
 Currently this is just a 3D renderer, but in the future I want to make it into an actual game.
 
 ## Building
-Make sure to clone the repo with submodules, and ensure LuaJIT is installed.
+#### Dependencies
+- `7z` CLI tool
+- LuaJIT shared library
+- GLFW shared library
 #### Configs
 - `debug` - symbols, `-O2` optimizations, and on Linux, will enable asan.
 - `release` - no symbols, `-O2` optimizations.
@@ -13,7 +16,6 @@ Compile LuaJIT, GLFW, and place them in the root directory of this project.
 $ make config=debug
 ```
 ### Windows
-Needs the `7z` command line tool.
 Other than that, the same as Linux.
 
 ## Project Structure

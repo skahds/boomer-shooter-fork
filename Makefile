@@ -5,7 +5,8 @@ Q = @
 INCLUDE = \
 	-Icore -Ilib/glad/include -Ilib/miniz/include \
 	-Ilib/stb/include -Ilib/luajit -Ilib 
-CFLAGS = -std=c99 -Wextra $(INCLUDE) -Dbse_allow_opengl
+CFLAGS = -std=c99 -Wall -Wextra -Wno-unused-parameter $(INCLUDE) \
+	-Dbse_allow_opengl
 LDFLAGS =
 
 PROJECT_NAME = DEMONCHIME
@@ -81,13 +82,7 @@ $(EXE): $(OBJ)
 
 $(CORE_HAD): $(CORE_HAD_FILES:%=$(CORE_HAD_DIR)/%)
 	@echo "had $@"
-ifeq (Linux,$(HOST_SYS))
-	$(Q)(cd $(CORE_HAD_DIR) && zip -r - $(CORE_HAD_FILES)) > $@
-endif
-ifeq (Windows,$(HOST_SYS))
-# TODO: TEST ON LINUX
 	$(Q)cd $(CORE_HAD_DIR) && 7z a -tzip ../../$@ $(CORE_HAD_FILES)
-endif
 
 clean:
 	$(RM) $(CLEAN_FILES)
@@ -96,4 +91,4 @@ compile_flags:
 	$(Q)echo "" > compile_flags.txt
 	$(Q)$(foreach flag,$(CFLAGS),echo $(flag) >> compile_flags.txt;)
 
-include $(DEP)
+-include $(DEP)
