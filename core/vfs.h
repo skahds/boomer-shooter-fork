@@ -25,6 +25,7 @@ enum VfsType
 
 struct Vfs
 {
+  struct Vfs* next;
   enum VfsType type;
   mz_zip_archive zip;
   char* path;

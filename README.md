@@ -3,15 +3,16 @@ Currently this is just a 3D renderer, but in the future I want to make it into a
 
 ## Building
 Make sure to clone the repo with submodules, and ensure LuaJIT is installed.
+#### Configs
+- `debug` - symbols, `-O2` optimizations, and on Linux, will enable asan.
+- `release` - no symbols, `-O2` optimizations.
 ### On Linux
+Compile LuaJIT, GLFW, and place them in the root directory of this project.
 ```bash
-$ sh build.sh debug
-$ ./bin/debug/bs
+$ make config=debug
 ```
-The `debug` can be replaced with `release`, and that will enable optimizations.
-If you want optimizations, but don't want to give up symbols, you can use `releasesym`.
 ### Windows
-Currently not tested, and probably won't work. Will eventually work. Maybe.
+Same as Linux.
 
 ## Project Structure
 The project structure is very simple:
@@ -19,8 +20,7 @@ The project structure is very simple:
 - `core/gfx`: for any rendering code
 - `core/wrap`: wraps the engine api into Lua
 - `core/math`: linear algebra
-- `opengl`: for any opengl-specific code
+- `core/gfx/opengl`: for any opengl-specific code
 - `game`: where the game code goes
 - `lib`: third-party libraries
 - `res`: resources, like shaders, textures, audio, etc
-- `build`: build system code
