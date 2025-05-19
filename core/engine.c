@@ -36,10 +36,9 @@ void EngineInit(struct Engine* engine, struct EngineConfig conf)
 {
   LogInfo("initializing engine...");
 
-  const char* vfs_mnt = "./";
-  enum VfsError vfs_err = VfsInit(&engine->vfs, vfs_mnt);
+  enum VfsError vfs_err = VfsInit(&engine->vfs, conf.mount_path);
   if (vfs_err) {
-    LogFatal(1, "could not mount vfs at '%s'", vfs_mnt);
+    LogFatal(1, "could not mount vfs at '%s'", conf.mount_path);
   }
 
   if (glfwInit() < 0) {

@@ -27,6 +27,7 @@ struct Engine
 
 struct EngineConfig
 {
+  const char* mount_path;
   const char* window_title;
   vec2i_t window_size;
   vec2i_t screen_size;
