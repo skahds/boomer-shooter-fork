@@ -27,6 +27,7 @@ OBJ = \
 # this one contains every core resource and script
 CORE_HAD = CORE.HAD
 CORE_HAD_DIR = core/had
+# all of these files are under CORE_HAD_DIR
 CORE_HAD_FILES = \
 	core/init.lua core/LerpedNumber.lua \
 	res/fdefault.glsl res/vdefault.glsl res/ffbdraw.glsl res/vfbdraw.glsl
