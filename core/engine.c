@@ -127,8 +127,7 @@ void EngineUpdate(struct Engine* engine)
     TimerNewTick(&engine->timer);
 
     if (engine->L != NULL) {
-      lua_getfield(engine->L, LUA_GLOBALSINDEX, "step");
-      // lua_getglobal(engine->L, "step");
+      lua_getglobal(engine->L, "step");
       if (!lua_isnil(engine->L, -1)) {
         if (!lua_isfunction(engine->L, -1)) {
           LogFatal(1, "global 'step' must be a function");

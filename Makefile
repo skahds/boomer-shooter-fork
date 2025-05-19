@@ -40,8 +40,8 @@ ifeq ($(config),release)
 else
 	config = debug
 	CFLAGS += -O2 -g -Dbse_debug
-	ifneq ($(HOST_SYS),Windows)
-		FLAGS += -fsanitize=address
+	ifeq ($(HOST_SYS),Linux)
+		CFLAGS += -fsanitize=address
 	endif
 endif
 

@@ -50,7 +50,7 @@ static bool IsFilenameValid(const char *filename) {
 }
 enum VfsError VfsInit(struct Vfs* vfs, const char* path)
 {
-  bool is_dir = IsPathDir(path) || path != RemoveCwdPrefix(path);
+  bool is_dir = IsPathDir(path);
   memset(&vfs->zip, 0, sizeof(mz_zip_archive));
   if (!is_dir && !mz_zip_reader_init_file(&vfs->zip, path, 0))
     return VFS_COULD_NOT_MOUNT;
@@ -211,7 +211,7 @@ char* VfsReadTxtFile(struct Vfs* vfs, const char* path, size_t* size)
 
     free(zdat);
 
-    LogDebug("loaded file '%s'");
+    LogDebug("loaded file '%s'", path);
     return dat;
   }
   return NULL;
