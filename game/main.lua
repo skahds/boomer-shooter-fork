@@ -1,7 +1,7 @@
 package.path = "./?/init.lua;" .. package.path
-if jit.os == "Windows" then
+if core.os == "windows" then
   package.path = package.path .. "game/?.lua;game/?/init.lua"
-else
+elseif core.os == "linux" then
   package.path = package.path .. ";game/?.lua;game/?/init.lua"
 end
 local gcore = require("core")

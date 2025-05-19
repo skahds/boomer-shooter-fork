@@ -201,6 +201,8 @@ void WrapEngine(lua_State* L)
 {
   lua_getglobal(L, CORE_NAME);
   RegisterFunctions(L, engine_funcs);
+  lua_pushstring(L, bse_os_str);
+  lua_setfield(L, -2, "os");
   lua_pop(L, 1);
 
   // register loader
