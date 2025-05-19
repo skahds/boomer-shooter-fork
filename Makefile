@@ -31,14 +31,16 @@ DEP = $(OBJ:%.o=%.d)
 # this one contains every core resource and script
 CORE_HAD = CORE.HAD
 CORE_HAD_DIR = core/had
-# all of these files are under CORE_HAD_DIR
-CORE_HAD_FILES = \
-	core/init.lua core/LerpedNumber.lua \
-	res/fdefault.glsl res/vdefault.glsl res/ffbdraw.glsl res/vfbdraw.glsl
 
-CLEAN_FILES = $(OBJ) $(DEP) $(EXE) $(CORE_HAD)
+GAME_HAD = $(PROJECT_NAME).HAD
+GAME_HAD_DIR = game
 
+CLEAN_FILES = $(OBJ) $(DEP) $(EXE) $(CORE_HAD) $(GAME_HAD)
+
+CD = cd
+ECHO = echo
 RM = rm -f
+SILENCE = &> /dev/null
 
 ifeq (,$(findstring Windows,$(OS)))
 	HOST_SYS = $(shell uname -s)
@@ -47,6 +49,7 @@ else
 	EXE := $(EXE).EXE
 	CLEAN_FILES := $(subst /,\,$(CLEAN_FILES))
 	RM = del
+	SILENCE = > nul
 endif
 
 ifeq ($(config),release)
@@ -70,25 +73,29 @@ endif
 
 .PHONY: all clean compile_flags
 
-all: $(EXE) $(CORE_HAD)
+all: $(EXE) $(CORE_HAD) DEMONCHIME.HAD
 
 $(EXE): $(OBJ)
-	@echo "cc $@"
+	@$(ECHO) "cc $@"
 	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ)
 
 %.o: %.c
-	@echo "cc $< -> $@"
+	@$(ECHO) "cc $< -> $@"
 	$(Q)$(CC) $(CFLAGS) -MMD -c -o $@ $<
 
-$(CORE_HAD): $(CORE_HAD_FILES:%=$(CORE_HAD_DIR)/%)
-	@echo "had $@"
-	$(Q)cd $(CORE_HAD_DIR) && 7z a -tzip ../../$@ $(CORE_HAD_FILES)
+$(CORE_HAD): $(CORE_HAD_DIR)
+	@$(ECHO) "had $@"
+	$(Q)$(CD) $(CORE_HAD_DIR) && 7z a -tzip ../../$@ ./* $(SILENCE)
+
+$(GAME_HAD): $(GAME_HAD_DIR)
+	@$(ECHO) "had $@"
+	$(Q)$(CD) $(GAME_HAD_DIR) && 7z a -tzip ../$@ ./* $(SILENCE)
 
 clean:
 	$(RM) $(CLEAN_FILES)
 
 compile_flags:
-	$(Q)echo "" > compile_flags.txt
+	@$(ECHO) "" > compile_flags.txt
 	$(Q)$(foreach flag,$(CFLAGS),echo $(flag) >> compile_flags.txt;)
 
 -include $(DEP)
