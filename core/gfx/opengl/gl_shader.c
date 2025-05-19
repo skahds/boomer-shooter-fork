@@ -120,7 +120,9 @@ struct Shader* gl_ShaderLoadFromFiles(
   const char* frag)
 {
   char* vsrc = VfsReadTxtFile(vfs, vert, NULL);//ReadFile(vert);
+  if (!vsrc) LogFatal(1, "could not load vertex shader '%s'", vert);
   char* fsrc = VfsReadTxtFile(vfs, frag, NULL);//ReadFile(frag);
+  if (!fsrc) LogFatal(1, "could not load fragment shader '%s'", frag);
   uint32_t vertex_handle = CompileSource(vert, vsrc, GL_VERTEX_SHADER);
   uint32_t fragment_handle = CompileSource(frag, fsrc, GL_FRAGMENT_SHADER);
   Destroy(vsrc);

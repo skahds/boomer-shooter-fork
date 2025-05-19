@@ -1,5 +1,7 @@
 CC = gcc
 
+Q = @
+
 INCLUDE = \
 	-Icore -Ilib/glad/include -Ilib/miniz/include \
 	-Ilib/stb/include -Ilib/luajit -Ilib 
@@ -22,6 +24,7 @@ OBJ = \
 	core/gfx/opengl/gl_gfx.o core/gfx/opengl/gl_shader.o \
 	core/gfx/opengl/gl_texture.o core/gfx/opengl/gl_type_conv.o \
 	core/gfx/opengl/gl_vertex_array.o lib/glad/src/glad.o lib/stb/stb.o
+DEP = $(OBJ:%.o=%.d)
 
 # HAD files store game content
 # this one contains every core resource and script
@@ -32,7 +35,7 @@ CORE_HAD_FILES = \
 	core/init.lua core/LerpedNumber.lua \
 	res/fdefault.glsl res/vdefault.glsl res/ffbdraw.glsl res/vfbdraw.glsl
 
-CLEAN_FILES = $(OBJ) $(OBJ:%.o=%.d) $(EXE) $(CORE_HAD)
+CLEAN_FILES = $(OBJ) $(DEP) $(EXE) $(CORE_HAD)
 
 RM = rm -f
 
@@ -40,6 +43,7 @@ ifeq (,$(findstring Windows,$(OS)))
 	HOST_SYS = $(shell uname -s)
 else
 	HOST_SYS = Windows
+	EXE := $(EXE).EXE
 	CLEAN_FILES := $(subst /,\,$(CLEAN_FILES))
 	RM = del
 endif
@@ -69,25 +73,27 @@ all: $(EXE) $(CORE_HAD)
 
 $(EXE): $(OBJ)
 	@echo "cc $@"
-	@$(CC) -o $@ $(OBJ) $(CFLAGS) $(LDFLAGS)
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ)
 
 %.o: %.c
 	@echo "cc $< -> $@"
-	@$(CC) -o $@ -c $< $(CFLAGS) -MMD
+	$(Q)$(CC) $(CFLAGS) -MMD -c -o $@ $<
 
 $(CORE_HAD): $(CORE_HAD_FILES:%=$(CORE_HAD_DIR)/%)
 	@echo "had $@"
 ifeq (Linux,$(HOST_SYS))
-	@$(RM) CORE.HAD
-	@(cd $(CORE_HAD_DIR) && zip -r - $(CORE_HAD_FILES)) > $(CORE_HAD)
+	$(Q)(cd $(CORE_HAD_DIR) && zip -r - $(CORE_HAD_FILES)) > $@
 endif
-# TODO: handle windows
+ifeq (Windows,$(HOST_SYS))
+# TODO: TEST ON LINUX
+	$(Q)cd $(CORE_HAD_DIR) && 7z a -tzip ../../$@ $(CORE_HAD_FILES)
+endif
 
 clean:
 	$(RM) $(CLEAN_FILES)
 
 compile_flags:
-	@echo "" > compile_flags.txt
-	@$(foreach flag,$(CFLAGS),echo $(flag) >> compile_flags.txt;)
+	$(Q)echo "" > compile_flags.txt
+	$(Q)$(foreach flag,$(CFLAGS),echo $(flag) >> compile_flags.txt;)
 
--include $(OBJ:%.o=%.d)
+include $(DEP)

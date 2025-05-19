@@ -174,6 +174,8 @@ char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size)
     }
     mnt = mnt->next;
   }
+
+  LogWarning("could not find file '%s'", path);
   return NULL;
 }
 

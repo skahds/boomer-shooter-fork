@@ -63,10 +63,7 @@ void EngineInit(struct Engine* engine, struct EngineConfig conf)
   InitBackend(engine, GFX_BACKEND_OPENGL);
 
   engine->target_screen_size = conf.screen_size;
-  engine->screen_size = (vec2i_t){
-    ceil((float)conf.window_size.x),
-    ceil((float)conf.window_size.y),
-  };
+  engine->screen_size = conf.screen_size;
   engine->screen = FramebufferCreate(
     engine->renderer,
     engine->vfs,
