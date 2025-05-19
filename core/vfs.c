@@ -48,19 +48,21 @@ static bool IsFilenameValid(const char *filename) {
     strstr(filename, "..") ||
     strstr(filename, ":\\"));
 }
+
 enum VfsError VfsInit(struct Vfs* vfs, const char* path)
 {
-  bool is_dir = IsPathDir(path);
+  size_t len = strlen(path);
+  char* owned_path = CreateArray(char, len + 1);
+  if (!owned_path) return VFS_OUT_OF_MEM;
+  strcpy(owned_path, path);
+  if (IsCharPathSep(owned_path[len - 1])) owned_path[len - 1] = '\0';
+
+  bool is_dir = IsPathDir(owned_path);
   memset(&vfs->zip, 0, sizeof(mz_zip_archive));
-  if (!is_dir && !mz_zip_reader_init_file(&vfs->zip, path, 0))
+  if (!is_dir && !mz_zip_reader_init_file(&vfs->zip, owned_path, 0))
     return VFS_COULD_NOT_MOUNT;
 
-  size_t len = strlen(path);
-  vfs->path = CreateArray(char, len + 1);
-  if (!vfs->path) return VFS_OUT_OF_MEM;
-  strcpy(vfs->path, path);
-  if (IsCharPathSep(vfs->path[len - 1])) vfs->path[len - 1] = '\0';
-
+  vfs->path = owned_path;
   vfs->type = is_dir ? VFS_DIR : VFS_ZIP;
 
   LogInfo("mounted vfs at '%s'", path);
