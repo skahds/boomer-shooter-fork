@@ -6,7 +6,7 @@ int main(int argc, const char* args[])
 {
   LogInfo("os: %s", bse_os_str);
 
-  const char* mount_path = "./DEMONCHIME.HAD";
+  const char* mount_path = "DEMONCHIME.HAD";
   if (argc > 1) mount_path = args[1];
 
   struct EngineConfig conf = (struct EngineConfig){

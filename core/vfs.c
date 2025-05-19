@@ -149,7 +149,7 @@ char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size)
     } else if (mnt->type == VFS_ZIP) {
       size_t zdat_size;
       char* zdat = mz_zip_reader_extract_file_to_heap(
-        &vfs->zip, lpath, &zdat_size, 0);
+        &mnt->zip, lpath, &zdat_size, 0);
       if (!zdat) {
         LogWarning("could not load file '%s'", path);
         return NULL;
@@ -159,7 +159,7 @@ char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size)
 
       char* dat = CreateArray(char, zdat_size + 1);
       if (!dat) {
-        LogWarning("could not load file '%s'", path);
+        LogWarning("could not allocate for file '%s'", path);
         free(zdat);
         return NULL;
       }

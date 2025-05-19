@@ -37,9 +37,9 @@ The project structure is very simple:
 - `core/math`: linear algebra
 - `core/gfx/opengl`: for any opengl-specific code
 - `core/had`: contains scripts and resources that the core engine needs
-- `game`: where the game code goes
 - `lib`: third-party libraries
-- `res`: resources, like shaders, textures, audio, etc
+- `game`: where the game code goes
+- `game/res`: resources, like shaders, textures, audio, etc
 ## HAD files
 HAD files are just zip files, but with a different extension so you know that
 they're for this engine. HAD stands for "Here's All the Data".
