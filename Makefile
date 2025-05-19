@@ -1,7 +1,8 @@
 CC = gcc
 
-INCLUDE = -Icore -Ilib/luajit/src -Ilib/glfw/include -Ilib/glad/include \
-  -Ilib/miniz/include -Ilib/stb/include -Ilib
+INCLUDE = \
+	-Icore -Ilib/glad/include -Ilib/miniz/include \
+	-Ilib/stb/include -Ilib/luajit -Ilib 
 CFLAGS = -std=c99 -Wextra $(INCLUDE) -Dbse_allow_opengl
 LDFLAGS =
 
@@ -59,9 +60,7 @@ all: $(EXE)
 
 $(EXE): $(OBJ)
 	@echo "cc $@"
-	$(CC) -o $@ $(OBJ) $(CFLAGS) $(LDFLAGS)
-	@echo "cflags: $(CFLAGS)"
-	@echo "ldflags: $(LDFLAGS)"
+	@$(CC) -o $@ $(OBJ) $(CFLAGS) $(LDFLAGS)
 
 %.o: %.c
 	@echo "cc $< -> $@"
