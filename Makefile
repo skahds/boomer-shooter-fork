@@ -46,7 +46,7 @@ endif
 
 ifeq (Linux,$(HOST_SYS))
 	CFLAGS += -Dbse_linux
-	LDFLAGS += -lluajit -lglfw3
+	LDFLAGS += -lluajit -lglfw -lm -L.
 endif
 ifeq (Windows,$(HOST_SYS))
 	CFLAGS += -Dbse_windows
