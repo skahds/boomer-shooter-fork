@@ -82,7 +82,7 @@ void EngineInitLua(struct Engine* engine)
   Wrap(L, engine);
 
   LogInfo("starting game...");
-  if (!ProtectedDoFile(L, engine, "game/main.lua")) {
+  if (!ProtectedDoFile(L, engine, "main.lua")) {
     LogFatal(1, "was not able to run game");
   }
 }
