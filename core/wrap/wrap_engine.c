@@ -135,13 +135,16 @@ static int L_Loader(lua_State* L)
   const char* paths = lua_tolstring(L, -1, &paths_len);
   lua_pop(L, 2);
 
+  LogInfo("%s", paths);
+
   const char* cur_path = paths;
 
-  while (cur_path <= paths + paths_len) {
+  while (cur_path < paths + paths_len) {
     size_t cur_path_len = 0;
     for (const char* c = cur_path; *c != ';' && *c != '\0'; c++) {
       cur_path_len++;
     }
+    if (cur_path_len == 0) break;
 
     size_t q_pos = SIZE_MAX;
     for (size_t j = 0; j < cur_path_len; j++) {
@@ -162,6 +165,8 @@ static int L_Loader(lua_State* L)
     memcpy(path + q_pos, module_cpy, module_len); // copy module len
     memcpy(path + q_pos + module_len, cur_path + q_pos + 1, cur_path_len - q_pos - 1);
     path[path_len] = '\0';
+
+    LogInfo("trying %.*s", path_len, path);
 
     // check if file exists
     if (VfsDoesFileExist(&engine->vfs, path)) {

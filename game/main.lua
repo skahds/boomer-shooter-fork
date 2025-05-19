@@ -1,5 +1,5 @@
 package.path = "./?/init.lua;" .. package.path
-package.path = package.path .. ";game/?.lua;game/?/init.lua"
+package.path = package.path .. "game/?.lua;game/?/init.lua"
 local gcore = require("core")
 
 local tex = core.LoadTexture("res/textures/bricks.png")

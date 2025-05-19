@@ -7,6 +7,12 @@
 
 #include "mem.h"
 
+#define fseeko fseek
+#define ftello ftell
+#define _fseeki64 fseek
+#define _ftelli64 ftell
+#include "miniz/miniz.c"
+
 // Design goals:
 // - can initialize any number of virtual filesystems
 // - using a filesystem initialized from a zip is the same as one made from 
@@ -44,7 +50,7 @@ static bool IsFilenameValid(const char *filename) {
 }
 enum VfsError VfsInit(struct Vfs* vfs, const char* path)
 {
-  bool is_dir = IsPathDir(path);
+  bool is_dir = IsPathDir(path) || path != RemoveCwdPrefix(path);
   memset(&vfs->zip, 0, sizeof(mz_zip_archive));
   if (!is_dir && !mz_zip_reader_init_file(&vfs->zip, path, 0))
     return VFS_COULD_NOT_MOUNT;

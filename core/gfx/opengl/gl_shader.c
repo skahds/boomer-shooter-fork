@@ -83,8 +83,14 @@ static struct Shader* ShaderCreate(uint32_t vert, uint32_t frag)
     LogFatal(1, "[" TEXT_DARK_GRAY "shader" TEXT_NORMAL "] link error: %s", msg);
   }
 
-  FindShaderUniforms(s);
-  FindShaderAttribs(s);
+  s->uniforms.vars = NULL;
+  s->uniforms.count = 0;
+  s->uniforms.capacity = 0;
+  s->attrs.vars = NULL;
+  s->attrs.count = 0;
+  s->attrs.capacity = 0;
+  //FindShaderUniforms(s);
+  //FindShaderAttribs(s);
 
   LogDebug("created shader %d", handle);
 
@@ -150,7 +156,24 @@ static struct ShaderVar* GetUniform(struct Shader* s, const char* name)
     len,
     hash
   );
-  if (var->name == NULL) LogFatal(1, "uniform '%s' does not exist", name);
+  if (var == NULL || var->name == NULL) {
+    int loc = glGetUniformLocation(s->handle, name);
+    if (loc == -1) LogFatal(1, "uniform '%s' does not exist", name);
+
+    struct ShaderVar new_var;
+    new_var.loc = loc;
+
+    new_var.name = CreateArray(char, len + 1);
+    memcpy(new_var.name, name, len);
+    new_var.name[len] = '\0';
+    new_var.len = len;
+    new_var.hash = hash;
+    new_var.type = TYPE_FLOAT;
+    new_var.count = 1;
+
+    ShaderTableAddVar(&s->uniforms, new_var);
+    return GetUniform(s, name);
+  }
   return var;
 }
 

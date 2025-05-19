@@ -1,0 +1,77 @@
+CC = gcc
+
+INCLUDE = -Icore -Ilib/luajit/src -Ilib/glfw/include -Ilib/glad/include \
+  -Ilib/miniz/include -Ilib/stb/include -Ilib
+CFLAGS = -std=c99 -Wextra $(INCLUDE) -Dbse_allow_opengl
+LDFLAGS =
+
+PROJECT_NAME = DEMONCHIME
+
+EXE = $(PROJECT_NAME)
+OBJ = \
+	main.o core/include.o core/log.o core/engine.o core/image.o core/prng.o \
+	core/timer.o core/vfs.o core/math/mat4.o core/math/transform.o \
+	core/wrap/wrap.o core/wrap/wrap_enums.o core/wrap/wrap_engine.o \
+	core/wrap/wrap_log.o core/wrap/wrap_mat4.o core/wrap/wrap_mesh.o \
+	core/wrap/wrap_vertex_format.o core/wrap/wrap_shader.o \
+	core/wrap/wrap_texture.o core/wrap/wrap_prng.o core/gfx/buffer_object.o \
+	core/gfx/framebuffer.o core/gfx/gfx.o core/gfx/gfx_types.o core/gfx/mesh.o \
+	core/gfx/shader.o core/gfx/texture.o core/gfx/vertex_array.o \
+	core/gfx/opengl/gl_buffer_object.o core/gfx/opengl/gl_framebuffer.o \
+	core/gfx/opengl/gl_gfx.o core/gfx/opengl/gl_shader.o \
+	core/gfx/opengl/gl_texture.o core/gfx/opengl/gl_type_conv.o \
+	core/gfx/opengl/gl_vertex_array.o lib/glad/src/glad.o lib/stb/stb.o
+
+CLEAN_FILES = $(OBJ) $(OBJ:%.o=%.d) $(EXE)
+
+RM = rm -f
+
+ifeq (,$(findstring Windows,$(OS)))
+	HOST_SYS = $(shell uname -s)
+else
+	HOST_SYS = Windows
+	CLEAN_FILES := $(subst /,\,$(CLEAN_FILES))
+	RM = del
+endif
+
+ifeq ($(config),release)
+	CFLAGS += -O2 -Dbse_release
+else
+	config = debug
+	CFLAGS += -O2 -g -Dbse_debug
+	ifneq ($(HOST_SYS),Windows)
+		FLAGS += -fsanitize=address
+	endif
+endif
+
+ifeq (Linux,$(HOST_SYS))
+	CFLAGS += -Dbse_linux
+	LDFLAGS += -lluajit -lglfw3
+endif
+ifeq (Windows,$(HOST_SYS))
+	CFLAGS += -Dbse_windows
+	LDFLAGS += -llua51 -lglfw3 -L.
+endif
+
+.PHONY: all clean compile_flags
+
+all: $(EXE)
+
+$(EXE): $(OBJ)
+	@echo "cc $@"
+	$(CC) -o $@ $(OBJ) $(CFLAGS) $(LDFLAGS)
+	@echo "cflags: $(CFLAGS)"
+	@echo "ldflags: $(LDFLAGS)"
+
+%.o: %.c
+	@echo "cc $< -> $@"
+	@$(CC) -o $@ -c $< $(CFLAGS) -MMD
+
+clean:
+	$(RM) $(CLEAN_FILES)
+
+compile_flags:
+	@echo "" > compile_flags.txt
+	@$(foreach flag,$(CFLAGS),echo $(flag) >> compile_flags.txt;)
+
+-include $(OBJ:%.o=%.d)

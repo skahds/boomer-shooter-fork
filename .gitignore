@@ -1,3 +1,10 @@
 .luarc.json
 bin/
 compile_flags.txt
+*.o
+*.d
+*.a
+*.so
+*.exe
+*.lib
+*.dll

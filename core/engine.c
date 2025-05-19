@@ -178,6 +178,7 @@ void EngineDraw(struct Engine* engine)
   );
 
   TimerDoneRendering(&engine->timer);
+  //exit(1);
 }
 
 void EngineSwapBuffers(struct Engine* engine)
