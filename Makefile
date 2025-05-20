@@ -73,7 +73,7 @@ endif
 
 .PHONY: all clean compile_flags
 
-all: $(EXE) $(CORE_HAD) DEMONCHIME.HAD
+all: $(EXE) $(CORE_HAD) $(GAME_HAD)
 
 $(EXE): $(OBJ)
 	@$(ECHO) "cc $@"
