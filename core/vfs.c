@@ -77,11 +77,8 @@ enum VfsError VfsMount(struct Vfs** vfs, const char* path)
   return VFS_OK;
 }
 
-bool VfsDoesFileExist(struct Vfs* vfs, const char* path)
+static bool DoesFileExistInMount(struct Vfs* vfs, const char* path)
 {
-  if (!IsFilenameValid(path)) return false;
-  path = RemoveCwdPrefix(path);
-
   if (vfs->type == VFS_DIR) {
     struct stat stats;
     char* full_path = Concat(vfs->path, "/", path, NULL);
@@ -92,6 +89,20 @@ bool VfsDoesFileExist(struct Vfs* vfs, const char* path)
   } else if (vfs->type == VFS_ZIP) {
     int index = mz_zip_reader_locate_file(&vfs->zip, path, NULL, 0);
     return index != -1;
+  }
+  return false;
+}
+
+bool VfsDoesFileExist(struct Vfs* vfs, const char* path)
+{
+  if (!IsFilenameValid(path)) return false;
+  path = RemoveCwdPrefix(path);
+
+  struct Vfs* mnt = vfs;
+
+  while (mnt) {
+    if (DoesFileExistInMount(mnt, path)) return true;
+    mnt = mnt->next;
   }
   return false;
 }
@@ -107,7 +118,7 @@ char* VfsReadFile(struct Vfs* vfs, const char* path, size_t* size)
   struct Vfs* mnt = vfs;
 
   while (mnt) {
-    if (!VfsDoesFileExist(mnt, path)) {
+    if (!DoesFileExistInMount(mnt, lpath)) {
       mnt = mnt->next; // skip
       continue;
     }

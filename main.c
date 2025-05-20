@@ -6,11 +6,8 @@ int main(int argc, const char* args[])
 {
   LogInfo("os: %s", bse_os_str);
 
-  const char* mount_path = "DEMONCHIME.HAD";
-  if (argc > 1) mount_path = args[1];
-
   struct EngineConfig conf = (struct EngineConfig){
-    .mount_path = mount_path,
+    .mount_path = "DEMONCHIME.HAD",
     .window_title = "DEMONCHIME",
     .window_size = (vec2i_t){320 * 3, 180 * 3},
     .screen_size = (vec2i_t){320, 180},
@@ -19,6 +16,15 @@ int main(int argc, const char* args[])
 
   struct Engine engine;
   EngineInit(&engine, conf);
+
+  if (argc > 1) {
+    for (int i = 1; i < argc; i++) {
+      enum VfsError err =VfsMount(&engine.vfs, args[i]);
+      if (err != VFS_OK) {
+        LogFatal(1, "could not load '%s'", args[i]);
+      }
+    }
+  }
 
   EngineInitLua(&engine);
 

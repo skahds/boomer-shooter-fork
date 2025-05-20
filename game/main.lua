@@ -1,10 +1,10 @@
-package.path = "./?/init.lua;" .. package.path
 if core.os == "windows" then
-  package.path = package.path .. "game/?.lua;game/?/init.lua"
+  package.path = package.path .. "./?/init.lua"
 elseif core.os == "linux" then
-  package.path = package.path .. ";game/?.lua;game/?/init.lua"
+  package.path = package.path .. ";./?/init.lua"
 end
-local gcore = require("core")
+
+local lcore = require("core")
 
 local tex = core.LoadTexture("res/textures/puzzle_cube.png")
 tex:SetFilter(core.tex_filter.NEAREST, core.tex_filter.NEAREST)
@@ -85,9 +85,9 @@ cube:SetVertices({
 cube:Finalize(true)
 
 local r = 0
-local rx = gcore.CreateLerpedNumber()
-local ry = gcore.CreateLerpedNumber()
-local rz = gcore.CreateLerpedNumber()
+local rx = lcore.CreateLerpedNumber()
+local ry = lcore.CreateLerpedNumber()
+local rz = lcore.CreateLerpedNumber()
 
 function step()
   if core.IsKeyDown(core.key.ESCAPE) then

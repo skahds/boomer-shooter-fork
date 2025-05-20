@@ -169,8 +169,11 @@ static int L_Loader(lua_State* L)
       // it does; load
       size_t src_len;
       char* src = VfsReadTxtFile(engine->vfs, path, &src_len);
-      if (src == NULL)
+      if (src == NULL) {
+        Destroy(path);
+        Destroy(module_cpy);
         return luaL_error(L, "error loading file");
+      }
 
       int status = luaL_loadbuffer(L, src, src_len, path);
 
