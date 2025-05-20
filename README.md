@@ -18,8 +18,7 @@ On Linux, you need to copy `libluajit.so` to the project directory, and on
 Windows, it should be `lua51.dll`, compiled with `msvcbuild`.
 #### GLFW
 On Linux, you will need to copy `libglfw.so` to the root directory, and on 
-Windows, you need to copy both `glfw3.dll` and `libglfw3dll.a` to the
-root directory.
+Windows, you need to copy `glfw3.dll` to the root directory.
 
 Once you've compiled both LuaJIT and GLFW, you can then compile using `make`.
 ```bash
