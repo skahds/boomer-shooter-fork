@@ -24,10 +24,6 @@ Once you've compiled both LuaJIT and GLFW, you can then compile using `make`.
 ```bash
 $ make config=debug
 ```
-To run, you need to specify the game's directory.
-```bash
-$ ./DEMONCHIME ./game
-```
 ## Project Structure
 The project structure is very simple:
 - `core`: this is the engine
