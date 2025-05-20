@@ -1,6 +1,6 @@
-# Boomer Shooter
-Currently this is just a 3D renderer, but in the future I want to make it into an actual game.
-
+# DEMONCHIME
+Currently this is just a 3D renderer, but in the future I want to make it into
+an actual game.
 ## Building
 #### Dependencies
 - `7z` CLI tool
@@ -12,7 +12,6 @@ Currently this is just a 3D renderer, but in the future I want to make it into a
 ### Compiling
 Compile LuaJIT and GLFW as shared libraries, then place them in the root
 directory of this project.
-
 #### LuaJIT
 On Linux, you need to copy `libluajit.so` to the project directory, and on
 Windows, it should be `lua51.dll`, compiled with `msvcbuild`.
@@ -36,5 +35,8 @@ The project structure is very simple:
 - `game`: where the game code goes
 - `game/res`: resources, like shaders, textures, audio, etc
 ## HAD files
+HAD file store game data, the main executable will need both `CORE.HAD` and
+`DEMONCHIME.HAD` to run.
 HAD files are just zip files, but with a different extension so you know that
-they're for this engine. HAD stands for "Here's All the Data".
+they're for this engine. You can load additional HAD files by passing them to
+the executable in the CLI. HAD stands for "Here's All the Data".
